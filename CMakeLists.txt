@@ -26,6 +26,9 @@ set(PROJECT_SOURCES
 
         arduinocompat.h
         arduinocompat.cpp
+
+        WProgram.h
+        EEPROM.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
