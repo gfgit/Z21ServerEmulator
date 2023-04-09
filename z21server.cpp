@@ -81,37 +81,10 @@ extern void notifyz21LocoSpeed(uint16_t Adr, uint8_t speed, uint8_t steps) __att
 
 extern void notifyz21S88Data(uint8_t group)
 {
-    //return last state S88 Data for the Client!
+    if(!m_instance)
+        return;
 
-    byte MAdr = 1;       //Feedback Group Module
-    byte datasend[11];   //Array group index (1 byte) & feedback status (10 bytes)
-    datasend[0] = group; //requested group index
-
-    const int S88Module = 0; //TODO: store fake state
-    const int data[2] = {};
-
-    //Iterate through all active modules in memory
-    for (byte m = (group * 10); m < S88Module; m++)
-    {
-        datasend[MAdr] = data[m];
-        MAdr++;         //Next module in the group
-        if (MAdr >= 11) //10 modules of 8 ports each read
-        {
-            m_instance->m_z21->setS88Data(datasend);
-            return;
-        }
-    }
-
-    if (MAdr < 11)
-    {
-        //Still unused modules available in the group? Set this 0x00 and then report!
-        while (MAdr < 11)
-        {
-            datasend[MAdr] = 0x00; //fill last with zero
-            MAdr++;                //Next module in the group
-        }
-        m_instance->m_z21->setS88Data(datasend);
-    }
+    m_instance->sendS88Status(group);
 }
 
 //extern uint16_t notifyz21Railcom() __attribute__((weak));	//return global Railcom Adr
@@ -166,6 +139,28 @@ void Z21Server::setPower(Z21::PowerState state)
 Z21::PowerState Z21Server::getPower() const
 {
     return Z21::PowerState(m_z21->getPower());
+}
+
+uint8_t Z21Server::getS88State(int module) const
+{
+    if(module >= Z21::S88_MODULE_COUNT)
+        return 0;
+    return S88ModuleState[module];
+}
+
+void Z21Server::setS88ModuleState(int module, uint8_t state)
+{
+    if(module >= Z21::S88_MODULE_COUNT)
+        return;
+
+    //Store value
+    S88ModuleState[module] = state;
+
+    //Modules are grouped by 10
+    const int group = module / 10;
+
+    //Update Z21
+    sendS88Status(group);
 }
 
 void Z21Server::readPendingDatagram()
@@ -234,4 +229,37 @@ quint8 Z21Server::getClientHash(int clientIdx)
 
     quint8 HashIP = fourBytes[0] ^ fourBytes[1] ^ fourBytes[2] ^ fourBytes[3]; //make Hash from IP
     return HashIP;
+}
+
+void Z21Server::sendS88Status(int group)
+{
+    //return last state S88 Data for the Client!
+    //Group of 10 modules
+
+    byte MAdr = 1;       //Feedback Group Module
+    byte datasend[11];   //Array group index (1 byte) & feedback status (10 bytes)
+    datasend[0] = group; //requested group index
+
+    //Iterate through all active modules in memory
+    for (byte m = (group * 10); m < Z21::S88_MODULE_COUNT; m++)
+    {
+        datasend[MAdr] = S88ModuleState[m];
+        MAdr++;         //Next module in the group
+        if (MAdr >= 11) //10 modules of 8 ports each read
+        {
+            m_z21->setS88Data(datasend);
+            return;
+        }
+    }
+
+    if (MAdr < 11)
+    {
+        //Still unused modules available in the group? Set this 0x00 and then report!
+        while (MAdr < 11)
+        {
+            datasend[MAdr] = 0x00; //fill last with zero
+            MAdr++;                //Next module in the group
+        }
+        m_z21->setS88Data(datasend);
+    }
 }

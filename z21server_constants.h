@@ -19,6 +19,7 @@ enum class PowerState : uint8_t
     ServiceMode = 0x08 	    // The programming mode is active - Service Mode
 };
 
+constexpr int S88_MODULE_COUNT = 1;
 
 } // namespace Z21
 
