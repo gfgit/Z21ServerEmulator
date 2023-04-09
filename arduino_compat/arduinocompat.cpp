@@ -276,3 +276,35 @@ void init_millis()
 
 ////--------------------------------------------------------------------------------------------
 
+
+ArduinoCompatEEPROM::ArduinoCompatEEPROM()
+{
+    //EEPROM bytes are default initialized to 255
+    for(int i = 0; i < MAX_SIZE; i++)
+        storage[i] = 255;
+}
+
+byte ArduinoCompatEEPROM::read(int address)
+{
+    if(address < 0 || address >= MAX_SIZE)
+    {
+        qDebug() << "EEPROM READ addr:" << address << "invalid, size is:" << MAX_SIZE;
+        return 255;
+    }
+
+    byte value = storage[address];
+    qDebug() << "EEPROM READ addr:" << address << "val:" << value;
+    return value;
+}
+
+void ArduinoCompatEEPROM::write(int address, byte value)
+{
+    if(address < 0 || address >= MAX_SIZE)
+    {
+        qDebug() << "EEPROM WRITE addr:" << address << "invalid, size is:" << MAX_SIZE;
+        return;
+    }
+
+    qDebug() << "EEPROM WRITE addr:" << address << "val:" << value;
+    storage[address] = value;
+}

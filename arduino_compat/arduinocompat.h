@@ -26,24 +26,19 @@ void arduino_loop();
 class ArduinoCompatEEPROM
 {
 public:
-    ArduinoCompatEEPROM() = default;
+    ArduinoCompatEEPROM();
 
-    byte read(int address)
-    {
-        (void)address;
-        return 0;
-    }
+    byte read(int address);
 
-    void write(int address, byte value)
-    {
-        (void)address;
-        (void)value;
-    }
+    void write(int address, byte value);
 
     void update(int address, byte value)
     {
         write(address, value);
     }
+
+    static const int MAX_SIZE = 32 * 1024; //32 KB storage
+    byte storage[MAX_SIZE];
 };
 
 static ArduinoCompatEEPROM EEPROM;
