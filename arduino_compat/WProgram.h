@@ -1,11 +1,11 @@
-#ifndef EEPROM_H
-#define EEPROM_H
+#ifndef WPROGRAM_H
+#define WPROGRAM_H
 
 /* ARDUINO COMPATIBILITY
  *
  * This header is provided to use Z21 Library without source modifications
  */
 
-#include "arduinocompat.h"
+#include "arduino_compat/arduinocompat.h"
 
-#endif // EEPROM_H
+#endif // WPROGRAM_H

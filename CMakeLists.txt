@@ -24,11 +24,14 @@ set(PROJECT_SOURCES
         z21.h
         z21.cpp
 
-        arduinocompat.h
-        arduinocompat.cpp
+        arduino_compat/WProgram.h
+        arduino_compat/EEPROM.h
+        arduino_compat/arduinocompat.h
+        arduino_compat/arduinocompat.cpp
 
-        WProgram.h
-        EEPROM.h
+        z21library/z21header.h
+        z21library/z21.h
+        z21library/z21.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -53,6 +56,8 @@ else()
         )
     endif()
 endif()
+
+target_include_directories(Z21ServerEmulator PRIVATE z21library arduino_compat)
 
 target_link_libraries(Z21ServerEmulator PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)
 
