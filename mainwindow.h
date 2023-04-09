@@ -15,7 +15,18 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void timerEvent(QTimerEvent *e) override;
+
+signals:
+    void setShortCircuit();
+
+public slots:
+    void setPowerStateLed(int state);
+
 private:
     Ui::MainWindow *ui;
+    int m_blinkTimerId = 0;
+    bool blinkState = true;
+    QColor textColor;
 };
 #endif // MAINWINDOW_H
