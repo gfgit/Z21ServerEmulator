@@ -12,6 +12,14 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     connect(ui->shortCircuitBut, &QPushButton::clicked, this, &MainWindow::setShortCircuit);
+    connect(ui->s88_first, &QCheckBox::toggled, this, [this](bool val)
+            {
+                emit s88_state(0, 0, val);
+            });
+    connect(ui->s88_second, &QCheckBox::toggled, this, [this](bool val)
+            {
+                emit s88_state(0, 1, val);
+            });
 }
 
 MainWindow::~MainWindow()

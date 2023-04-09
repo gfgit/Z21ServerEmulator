@@ -20,6 +20,8 @@ public:
 signals:
     void setShortCircuit();
 
+    void s88_state(int module, int port, bool value);
+
 public slots:
     void setPowerStateLed(int state);
 
