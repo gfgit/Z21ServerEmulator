@@ -2,9 +2,7 @@
 
 #include <QApplication>
 
-#include <QTimer>
-
-#include "arduinocompat.h"
+#include "z21server.h"
 
 int main(int argc, char *argv[])
 {
@@ -12,10 +10,8 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-    arduino_setup();
-    QTimer timer;
-    QObject::connect(&timer, &QTimer::timeout, &timer, [](){ arduino_loop(); });
-    timer.start(1000);
+    Z21Server server;
+    server.startServer();
 
     return a.exec();
 }

@@ -20,9 +20,9 @@ set(PROJECT_SOURCES
         mainwindow.h
         mainwindow.ui
 
-        z21header.h
-        z21.h
-        z21.cpp
+        z21server.cpp
+        z21server.h
+        z21server_constants.h
 
         arduino_compat/WProgram.h
         arduino_compat/EEPROM.h
