@@ -29,7 +29,7 @@ z21nvsClass NVSZ21;
 
 #else
 // AVR based Boards follows
-//#include <EEPROM.h>
+#include <EEPROM.h>
 #define FSTORAGE 	EEPROM
 	#if defined(ESP8266) || defined(ESP32) //ESP8266 or ESP32
 		#define FSTORAGEMODE write

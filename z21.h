@@ -56,10 +56,8 @@
 #elif ARDUINO >= 100
  #include <Arduino.h>
 #else
- //#include <WProgram.h>
+ #include <WProgram.h>
 #endif
-
-#include "arduinocompat.h"
 
 //--------------------------------------------------------------
 #define z21Port 21105      // local port to listen on

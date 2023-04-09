@@ -83,7 +83,7 @@
 #define Z21bcAll_s               0b00000001
 #define Z21bcRBus   		0x00000002
 #define Z21bcRBus_s              0b00000010
-#define Z21bcRailcom    	0x00000004    //RailCom-Daten fĂźr Abo Loks
+#define Z21bcRailcom    	0x00000004    //RailCom-Daten für Abo Loks
 #define Z21bcRailcom_s			0x100
 
 #define Z21bcSystemInfo 	0x00000100	//LAN_SYSTEMSTATE_DATACHANGED
@@ -105,7 +105,7 @@
 #define Z21bcLocoNetGBM_s        0b10010000
 
 //ab FW Version 1.29:
-#define Z21bcRailComAll		 0x00040000 //alles: Ănderungen bei RailCom-Daten ohne Lok Abo! -> LAN_RAILCOM_DATACHANGED
+#define Z21bcRailComAll		 0x00040000 //alles: Änderungen bei RailCom-Daten ohne Lok Abo! -> LAN_RAILCOM_DATACHANGED
 #define Z21bcRailComAll_s		 0b10000000
 
 //ab FW Version 1.30:
