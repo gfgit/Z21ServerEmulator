@@ -1,10 +1,10 @@
 # Z21ServerEmulator
-Computer Z21 Emulator based on Arduino sketch from Philipp Gahtow
+Computer Z21 Emulator with Qt GUI
 
 ## Z21 Library (Philipp Gahtow)
 This application uses Philipp Gahtow's Z21 library written for Arduino.
 It then adapts the code to work on desktop computers (Tested on Linux and Windows 10)
-The goal is to make less modifications as possible to keep compatible with Z21 library updates.
+The goal is to make as few modifications as possible to keep compatible with Z21 library updates.
 
 ### GitHub Page:
 https://github.com/Digital-MoBa
