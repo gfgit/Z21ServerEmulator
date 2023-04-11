@@ -19,8 +19,31 @@ typedef bool boolean;
 uint64_t millis();
 void init_millis();
 
-void arduino_setup();
-void arduino_loop();
+//void arduino_setup();
+//void arduino_loop();
+
+//Debugging
+#define SERIALDEBUG
+
+enum SerialEmuBase
+{
+    DEC = 0,
+    BIN,
+    HEX
+};
+
+class SerialEmulator
+{
+public:
+    SerialEmulator() = default;
+
+    void print(const char *str = nullptr);
+    void print(int val, int base = DEC);
+    void println(const char *str = nullptr);
+    void println(int val, int base = DEC);
+};
+
+static SerialEmulator Serial;
 
 
 class ArduinoCompatEEPROM
