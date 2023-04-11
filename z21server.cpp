@@ -6,6 +6,32 @@
 
 #include <iostream> //console debugging
 
+namespace Z21 {
+
+//Defined in z21server_constants.h
+QString getPowerStateName(PowerState state)
+{
+    switch (state)
+    {
+    case PowerState::Normal:
+        return QLatin1String("Normal");
+    case PowerState::EmergencyStop:
+        return QLatin1String("Emergency Stop");
+    case PowerState::TrackVoltageOff:
+        return QLatin1String("Track Voltage Off");
+    case PowerState::ShortCircuit:
+        return QLatin1String("Short Circuit");
+    case PowerState::ServiceMode:
+        return QLatin1String("Service Mode");
+    default:
+        break;
+    }
+
+    return QString();
+}
+
+}
+
 //Callbacks from Z21 Library
 
 static Z21Server *m_instance = nullptr; //Used by callbacks

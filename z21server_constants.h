@@ -1,7 +1,7 @@
 #ifndef Z21SERVER_CONSTANTS_H
 #define Z21SERVER_CONSTANTS_H
 
-#include <cstdint>
+#include <QString>
 
 namespace Z21 {
 
@@ -18,6 +18,8 @@ enum class PowerState : uint8_t
     ShortCircuit = 0x04,    // Short circuit
     ServiceMode = 0x08 	    // The programming mode is active - Service Mode
 };
+
+QString getPowerStateName(PowerState state); //Implemented in z21server.cpp
 
 constexpr int S88_MODULE_COUNT = 1;
 
