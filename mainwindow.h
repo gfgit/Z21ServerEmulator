@@ -10,6 +10,7 @@ QT_END_NAMESPACE
 class Z21Server;
 class PowerStatusLED;
 class QComboBox;
+class RBusInputModel;
 
 class MainWindow : public QMainWindow
 {
@@ -25,9 +26,6 @@ private slots:
     void onPowerStateChanged(int state);
     void onPowerComboIndexChanged();
 
-signals:
-    void s88_state(int module, int port, bool value);
-
 private:
     Ui::MainWindow *ui;
 
@@ -35,5 +33,6 @@ private:
     QComboBox *m_powerCombo;
 
     Z21Server *m_server = nullptr;
+    RBusInputModel *rbusModel;
 };
 #endif // MAINWINDOW_H

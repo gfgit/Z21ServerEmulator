@@ -10,6 +10,8 @@
 class QUdpSocket;
 class z21Class;
 
+class RBusRetroaction;
+
 extern "C" void notifyz21getSystemInfo(uint8_t client);
 extern "C" void notifyz21EthSend(uint8_t client, uint8_t *data);
 extern "C" void notifyz21RailPower(uint8_t State);
@@ -28,8 +30,7 @@ public:
     void setPower(Z21::PowerState state);
     Z21::PowerState getPower() const;
 
-    uint8_t getS88State(int module) const;
-    void setS88ModuleState(int module, uint8_t state);
+    RBusRetroaction *getRBUS() const;
 
 signals:
     void powerStateChanged(int state);
@@ -42,7 +43,6 @@ private:
     int addClientAndGetIndex(const Client& client);
     void sendDatagram(int clientIdx, const char *data, const qint64 size);
     quint8 getClientHash(int clientIdx);
-    void sendS88Status(int group);
 
 private:
     friend void ::notifyz21getSystemInfo(uint8_t client);
@@ -51,10 +51,12 @@ private:
     friend void notifyz21S88Data(uint8_t group);
     friend uint8_t notifyz21ClientHash(uint8_t client);
 
-    z21Class *m_z21;
+    friend class RBusRetroaction;
+
+    z21Class *m_z21 = nullptr;
 
 private:
-    QUdpSocket *m_server;
+    QUdpSocket *m_server = nullptr;
 
     struct Client
     {
@@ -68,7 +70,7 @@ private:
     };
     QVarLengthArray<Client, 64> m_clients;
 
-    uint8_t S88ModuleState[Z21::S88_MODULE_COUNT] = {};
+    RBusRetroaction *m_RBUS = nullptr;
 };
 
 #endif // Z21SERVER_H

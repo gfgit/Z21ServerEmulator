@@ -21,7 +21,7 @@ enum class PowerState : uint8_t
 
 QString getPowerStateName(PowerState state); //Implemented in z21server.cpp
 
-constexpr int S88_MODULE_COUNT = 1;
+constexpr int S88_MODULE_COUNT = 62;
 
 } // namespace Z21
 

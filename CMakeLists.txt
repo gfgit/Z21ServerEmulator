@@ -24,6 +24,11 @@ set(PROJECT_SOURCES
         server/z21server.h
         server/z21server_constants.h
 
+        server/retroaction/rbusretroaction.h
+        server/retroaction/rbusretroaction.cpp
+        server/retroaction/rbusinputmodel.h
+        server/retroaction/rbusinputmodel.cpp
+
         widgets/powerstatusled.h
         widgets/powerstatusled.cpp
 

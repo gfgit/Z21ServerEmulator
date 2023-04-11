@@ -2,15 +2,11 @@
 #include "./ui_mainwindow.h"
 
 #include "server/z21server.h"
+#include "server/retroaction/rbusinputmodel.h"
 
 #include "widgets/powerstatusled.h"
 #include <QComboBox>
 
-//TODO: move to common utils header
-#define bitRead(value, bit) (((value) >> (bit)) & 0x01)
-#define bitSet(value, bit) ((value) |= (1UL << (bit)))
-#define bitClear(value, bit) ((value) &= ~(1UL << (bit)))
-#define bitWrite(value, bit, bitvalue) (bitvalue ? bitSet(value, bit) : bitClear(value, bit))
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -18,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    //Power State header
     m_powerStatusLed = new PowerStatusLED(this);
 
     m_powerCombo = new QComboBox(this);
@@ -35,16 +32,11 @@ MainWindow::MainWindow(QWidget *parent)
     QHBoxLayout *powerLay = new QHBoxLayout;
     powerLay->addWidget(m_powerStatusLed);
     powerLay->addWidget(m_powerCombo);
-    ui->verticalLayout->addLayout(powerLay);
+    ui->verticalLayout->insertLayout(0, powerLay);
 
-    connect(ui->s88_first, &QCheckBox::toggled, this, [this](bool val)
-            {
-                emit s88_state(0, 0, val);
-            });
-    connect(ui->s88_second, &QCheckBox::toggled, this, [this](bool val)
-            {
-                emit s88_state(0, 1, val);
-            });
+    //R-BUS tab
+    rbusModel = new RBusInputModel(this);
+    ui->rbusTableView->setModel(rbusModel);
 }
 
 MainWindow::~MainWindow()
@@ -66,13 +58,9 @@ void MainWindow::setupConnections(Z21Server *z21)
             this, &MainWindow::onPowerStateChanged);
     onPowerStateChanged(int(m_server->getPower()));
 
-    connect(this, &MainWindow::s88_state, m_server, [this](int module, int port, bool value) {
-        uint8_t state = m_server->getS88State(module);
-        state = bitWrite(state, port, value);
-        m_server->setS88ModuleState(module, state);
-    });
-
     connect(m_server, &QObject::destroyed, this, [this](){ m_server = nullptr; });
+
+    rbusModel->setRetroAction(m_server->getRBUS());
 }
 
 void MainWindow::onPowerStateChanged(int state)

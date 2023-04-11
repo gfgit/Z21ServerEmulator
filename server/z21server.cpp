@@ -4,6 +4,8 @@
 
 #include "z21library/z21.h"
 
+#include "server/retroaction/rbusretroaction.h"
+
 #include <iostream> //console debugging
 
 namespace Z21 {
@@ -111,7 +113,7 @@ extern "C" void notifyz21S88Data(uint8_t group)
     if(!m_instance)
         return;
 
-    m_instance->sendS88Status(group);
+    m_instance->m_RBUS->sendS88Status(group);
 }
 
 //extern uint16_t notifyz21Railcom() __attribute__((weak));	//return global Railcom Adr
@@ -136,6 +138,8 @@ Z21Server::Z21Server(QObject *parent) :
     m_instance = this;
 
     m_z21 = new z21Class;
+    m_RBUS = new RBusRetroaction(this);
+
     m_server = new QUdpSocket(this);
     connect(m_server, &QUdpSocket::readyRead, this, &Z21Server::readPendingDatagram);
 }
@@ -171,28 +175,6 @@ void Z21Server::setPower(Z21::PowerState state)
 Z21::PowerState Z21Server::getPower() const
 {
     return Z21::PowerState(m_z21->getPower());
-}
-
-uint8_t Z21Server::getS88State(int module) const
-{
-    if(module >= Z21::S88_MODULE_COUNT)
-        return 0;
-    return S88ModuleState[module];
-}
-
-void Z21Server::setS88ModuleState(int module, uint8_t state)
-{
-    if(module >= Z21::S88_MODULE_COUNT)
-        return;
-
-    //Store value
-    S88ModuleState[module] = state;
-
-    //Modules are grouped by 10
-    const int group = module / 10;
-
-    //Update Z21
-    sendS88Status(group);
 }
 
 void Z21Server::readPendingDatagram()
@@ -263,35 +245,7 @@ quint8 Z21Server::getClientHash(int clientIdx)
     return HashIP;
 }
 
-void Z21Server::sendS88Status(int group)
+RBusRetroaction *Z21Server::getRBUS() const
 {
-    //return last state S88 Data for the Client!
-    //Group of 10 modules
-
-    byte MAdr = 1;       //Feedback Group Module
-    byte datasend[11];   //Array group index (1 byte) & feedback status (10 bytes)
-    datasend[0] = group; //requested group index
-
-    //Iterate through all active modules in memory
-    for (byte m = (group * 10); m < Z21::S88_MODULE_COUNT; m++)
-    {
-        datasend[MAdr] = S88ModuleState[m];
-        MAdr++;         //Next module in the group
-        if (MAdr >= 11) //10 modules of 8 ports each read
-        {
-            m_z21->setS88Data(datasend);
-            return;
-        }
-    }
-
-    if (MAdr < 11)
-    {
-        //Still unused modules available in the group? Set this 0x00 and then report!
-        while (MAdr < 11)
-        {
-            datasend[MAdr] = 0x00; //fill last with zero
-            MAdr++;                //Next module in the group
-        }
-        m_z21->setS88Data(datasend);
-    }
+    return m_RBUS;
 }
