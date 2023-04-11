@@ -10,6 +10,12 @@
 class QUdpSocket;
 class z21Class;
 
+extern "C" void notifyz21getSystemInfo(uint8_t client);
+extern "C" void notifyz21EthSend(uint8_t client, uint8_t *data);
+extern "C" void notifyz21RailPower(uint8_t State);
+extern "C" void notifyz21S88Data(uint8_t group);
+extern "C" uint8_t notifyz21ClientHash(uint8_t client);
+
 class Z21Server : public QObject
 {
     Q_OBJECT
@@ -34,13 +40,17 @@ private slots:
 private:
     struct Client;
     int addClientAndGetIndex(const Client& client);
-
-public:
     void sendDatagram(int clientIdx, const char *data, const qint64 size);
     quint8 getClientHash(int clientIdx);
     void sendS88Status(int group);
 
-public:
+private:
+    friend void ::notifyz21getSystemInfo(uint8_t client);
+    friend void notifyz21EthSend(uint8_t client, uint8_t *data);
+    friend void notifyz21RailPower(uint8_t State);
+    friend void notifyz21S88Data(uint8_t group);
+    friend uint8_t notifyz21ClientHash(uint8_t client);
+
     z21Class *m_z21;
 
 private:

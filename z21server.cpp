@@ -106,7 +106,7 @@ extern void notifyz21LocoFkt61to68(uint16_t Adr, uint8_t fkt) __attribute__((wea
 extern void notifyz21LocoFktExt(uint16_t Adr, uint8_t low, uint8_t high) __attribute__((weak));
 extern void notifyz21LocoSpeed(uint16_t Adr, uint8_t speed, uint8_t steps) __attribute__((weak));
 
-extern void notifyz21S88Data(uint8_t group)
+extern "C" void notifyz21S88Data(uint8_t group)
 {
     if(!m_instance)
         return;
