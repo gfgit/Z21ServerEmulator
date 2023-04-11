@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
-#include "z21server.h"
+#include "server/z21server.h"
 
 #include "widgets/powerstatusled.h"
 #include <QComboBox>

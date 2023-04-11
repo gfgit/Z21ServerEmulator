@@ -2,7 +2,7 @@
 
 #include <QApplication>
 
-#include "z21server.h"
+#include "server/z21server.h"
 
 int main(int argc, char *argv[])
 {

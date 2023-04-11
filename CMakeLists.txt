@@ -20,9 +20,9 @@ set(PROJECT_SOURCES
         mainwindow.h
         mainwindow.ui
 
-        z21server.cpp
-        z21server.h
-        z21server_constants.h
+        server/z21server.cpp
+        server/z21server.h
+        server/z21server_constants.h
 
         widgets/powerstatusled.h
         widgets/powerstatusled.cpp

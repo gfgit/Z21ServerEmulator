@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "../z21server_constants.h"
+#include "server/z21server_constants.h"
 
 class PowerStatusLED : public QWidget
 {
