@@ -7,6 +7,10 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+class Z21Server;
+class PowerStatusLED;
+class QComboBox;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -15,20 +19,21 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void timerEvent(QTimerEvent *e) override;
+    void setupConnections(Z21Server *z21);
+
+private slots:
+    void onPowerStateChanged(int state);
+    void onPowerComboIndexChanged();
 
 signals:
-    void setShortCircuit();
-
     void s88_state(int module, int port, bool value);
-
-public slots:
-    void setPowerStateLed(int state);
 
 private:
     Ui::MainWindow *ui;
-    int m_blinkTimerId = 0;
-    bool blinkState = true;
-    QColor textColor;
+
+    PowerStatusLED *m_powerStatusLed;
+    QComboBox *m_powerCombo;
+
+    Z21Server *m_server = nullptr;
 };
 #endif // MAINWINDOW_H

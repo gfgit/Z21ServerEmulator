@@ -24,6 +24,9 @@ set(PROJECT_SOURCES
         z21server.h
         z21server_constants.h
 
+        widgets/powerstatusled.h
+        widgets/powerstatusled.cpp
+
         arduino_compat/WProgram.h
         arduino_compat/EEPROM.h
         arduino_compat/arduinocompat.h

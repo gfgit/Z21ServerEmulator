@@ -1,9 +1,16 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
-#include <QTimerEvent>
+#include "z21server.h"
 
-#include "z21server_constants.h"
+#include "widgets/powerstatusled.h"
+#include <QComboBox>
+
+//TODO: move to common utils header
+#define bitRead(value, bit) (((value) >> (bit)) & 0x01)
+#define bitSet(value, bit) ((value) |= (1UL << (bit)))
+#define bitClear(value, bit) ((value) &= ~(1UL << (bit)))
+#define bitWrite(value, bit, bitvalue) (bitvalue ? bitSet(value, bit) : bitClear(value, bit))
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -11,7 +18,25 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    connect(ui->shortCircuitBut, &QPushButton::clicked, this, &MainWindow::setShortCircuit);
+    m_powerStatusLed = new PowerStatusLED(this);
+
+    m_powerCombo = new QComboBox(this);
+    m_powerCombo->addItem(Z21::getPowerStateName(Z21::PowerState::Normal),
+                          int(Z21::PowerState::Normal));
+    m_powerCombo->addItem(Z21::getPowerStateName(Z21::PowerState::EmergencyStop),
+                          int(Z21::PowerState::EmergencyStop));
+    m_powerCombo->addItem(Z21::getPowerStateName(Z21::PowerState::TrackVoltageOff),
+                          int(Z21::PowerState::TrackVoltageOff));
+    m_powerCombo->addItem(Z21::getPowerStateName(Z21::PowerState::ShortCircuit),
+                          int(Z21::PowerState::ShortCircuit));
+    m_powerCombo->addItem(Z21::getPowerStateName(Z21::PowerState::ServiceMode),
+                          int(Z21::PowerState::ServiceMode));
+
+    QHBoxLayout *powerLay = new QHBoxLayout;
+    powerLay->addWidget(m_powerStatusLed);
+    powerLay->addWidget(m_powerCombo);
+    ui->verticalLayout->addLayout(powerLay);
+
     connect(ui->s88_first, &QCheckBox::toggled, this, [this](bool val)
             {
                 emit s88_state(0, 0, val);
@@ -27,70 +52,41 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::timerEvent(QTimerEvent *e)
+void MainWindow::setupConnections(Z21Server *z21)
 {
-    if(e->timerId() == m_blinkTimerId)
-    {
-        blinkState = !blinkState;
+    m_server = z21;
 
-        QPixmap pix(QSize(16, 16));
-        pix.fill(blinkState ? textColor : Qt::transparent);
-        ui->powerLabelIcon->setPixmap(pix);
-    }
+    connect(m_server, &Z21Server::powerStateChanged,
+            m_powerStatusLed, &PowerStatusLED::setPowerState_slot);
+    m_powerStatusLed->setPowerState(m_server->getPower());
+
+    connect(m_powerCombo, qOverload<int>(&QComboBox::currentIndexChanged),
+            this, &MainWindow::onPowerComboIndexChanged);
+    connect(m_server, &Z21Server::powerStateChanged,
+            this, &MainWindow::onPowerStateChanged);
+    onPowerStateChanged(int(m_server->getPower()));
+
+    connect(this, &MainWindow::s88_state, m_server, [this](int module, int port, bool value) {
+        uint8_t state = m_server->getS88State(module);
+        state = bitWrite(state, port, value);
+        m_server->setS88ModuleState(module, state);
+    });
+
+    connect(m_server, &QObject::destroyed, this, [this](){ m_server = nullptr; });
 }
 
-void MainWindow::setPowerStateLed(int state)
+void MainWindow::onPowerStateChanged(int state)
 {
-    Z21::PowerState powerState = Z21::PowerState(state);
-
-    QString text;
-    bool blink = false;
-
-    switch (powerState)
-    {
-    case Z21::PowerState::Normal:
-        text = tr("Normal");
-        textColor = Qt::cyan;
-        break;
-    case Z21::PowerState::ServiceMode:
-        text = tr("Service Mode");
-        textColor = Qt::green;
-        break;
-    case Z21::PowerState::EmergencyStop:
-        text = tr("Emergency Stop");
-        textColor = Qt::cyan;
-        blink = true;
-        break;
-    case Z21::PowerState::ShortCircuit:
-        text = tr("Short Circuit");
-        textColor = Qt::red;
-        blink = true;
-        break;
-    case Z21::PowerState::TrackVoltageOff:
-        text = tr("Power Off");
-        textColor = Qt::black;
-        break;
-    default:
-        text = tr("Error");
-        textColor = Qt::black;
-        break;
-    }
-
-    ui->powerLabel->setText(text);
-
-    QPixmap pix(QSize(16, 16));
-    pix.fill(textColor);
-    ui->powerLabelIcon->setPixmap(pix);
-
-    blinkState = true;
-    if(blink && !m_blinkTimerId)
-    {
-        m_blinkTimerId = startTimer(1000);
-    }
-    else if(!blink && m_blinkTimerId)
-    {
-        killTimer(m_blinkTimerId);
-        m_blinkTimerId = 0;
-    }
+    int idx = m_powerCombo->findData(state);
+    m_powerCombo->setCurrentIndex(idx);
 }
 
+void MainWindow::onPowerComboIndexChanged()
+{
+    QVariant val = m_powerCombo->currentData();
+    Z21::PowerState state = Z21::PowerState(val.toInt());
+    if(!m_server || state == m_server->getPower())
+        return;
+
+    m_server->setPower(state);
+}
