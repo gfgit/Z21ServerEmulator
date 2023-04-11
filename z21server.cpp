@@ -4,6 +4,7 @@
 
 #include "z21library/z21.h"
 
+#include <iostream> //console debugging
 
 //Callbacks from Z21 Library
 
@@ -46,7 +47,7 @@ extern "C" void notifyz21RailPower(uint8_t State)
     if(!m_instance)
         return;
 
-    emit m_instance->powerStateChanged(State);
+    m_instance->setPower(Z21::PowerState(State));
 }
 
 /*
@@ -132,6 +133,11 @@ bool Z21Server::startServer(quint16 port)
 
 void Z21Server::setPower(Z21::PowerState state)
 {
+    if(state == getPower())
+    {
+        std::cerr << "Z21 POWER NOTIFY SAME: " << int(state) << std::endl << std::flush;
+    }
+
     m_z21->setPower(byte(state));
     emit powerStateChanged(int(state));
 }
