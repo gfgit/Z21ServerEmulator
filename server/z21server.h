@@ -11,6 +11,7 @@ class QUdpSocket;
 class z21Class;
 
 class RBusRetroaction;
+class AccessoryManager;
 
 extern "C" void notifyz21getSystemInfo(uint8_t client);
 extern "C" void notifyz21EthSend(uint8_t client, uint8_t *data);
@@ -31,6 +32,8 @@ public:
 
     RBusRetroaction *getRBUS() const;
 
+    AccessoryManager *getAccessoryMgr() const;
+
 signals:
     void powerStateChanged(int state);
 
@@ -50,6 +53,7 @@ private:
     friend uint8_t notifyz21ClientHash(uint8_t client);
 
     friend class RBusRetroaction;
+    friend class AccessoryManager;
 
     z21Class *m_z21 = nullptr;
 
@@ -69,6 +73,7 @@ private:
     QVarLengthArray<Client, 64> m_clients;
 
     RBusRetroaction *m_RBUS = nullptr;
+    AccessoryManager *m_accessoryMgr = nullptr;
 };
 
 #endif // Z21SERVER_H

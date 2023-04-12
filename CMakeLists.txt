@@ -29,6 +29,11 @@ set(PROJECT_SOURCES
         server/retroaction/rbusinputmodel.h
         server/retroaction/rbusinputmodel.cpp
 
+        server/accessories/accessorymanager.h
+        server/accessories/accessorymanager.cpp
+        server/accessories/accessorymodel.h
+        server/accessories/accessorymodel.cpp
+
         widgets/powerstatusled.h
         widgets/powerstatusled.cpp
 

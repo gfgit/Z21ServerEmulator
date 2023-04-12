@@ -5,6 +5,7 @@
 #include "z21library/z21.h"
 
 #include "server/retroaction/rbusretroaction.h"
+#include "server/accessories/accessorymanager.h"
 
 #include <iostream> //console debugging
 
@@ -89,9 +90,24 @@ extern void notifyz21CVPOMACCWRITEBIT(uint16_t Adr, uint16_t cvAdr, uint8_t valu
 extern void notifyz21CVPOMACCREADBYTE(uint16_t Adr, uint16_t cvAdr) __attribute__((weak));
 */
 
-extern uint8_t notifyz21AccessoryInfo(uint16_t Adr) __attribute__((weak));
-extern void notifyz21Accessory(uint16_t Adr, bool state, bool active) __attribute__((weak));
-extern void notifyz21ExtAccessory(uint16_t Adr, byte state) __attribute__((weak));
+extern "C" uint8_t notifyz21AccessoryInfo(uint16_t Adr)
+{
+    if(!m_instance)
+        return 0;
+
+    return m_instance->getAccessoryMgr()->getAccessoryState(Adr);
+}
+
+extern "C" void notifyz21Accessory(uint16_t Adr, bool state, bool active)
+{
+    Q_UNUSED(active) //TODO: What is the purpose of "active" flag?
+    if(!m_instance)
+        return;
+
+    m_instance->getAccessoryMgr()->setAccessoryState(Adr, state);
+}
+
+//extern void notifyz21ExtAccessory(uint16_t Adr, byte state) __attribute__((weak));
 
 extern void notifyz21LocoState(uint16_t Adr, uint8_t data[]) __attribute__((weak));
 extern void notifyz21LocoFkt(uint16_t Adr, uint8_t type, uint8_t fkt) __attribute__((weak));
@@ -139,6 +155,7 @@ Z21Server::Z21Server(QObject *parent) :
 
     m_z21 = new z21Class;
     m_RBUS = new RBusRetroaction(this);
+    m_accessoryMgr = new AccessoryManager(this);
 
     m_server = new QUdpSocket(this);
     connect(m_server, &QUdpSocket::readyRead, this, &Z21Server::readPendingDatagram);
@@ -248,4 +265,9 @@ quint8 Z21Server::getClientHash(int clientIdx)
 RBusRetroaction *Z21Server::getRBUS() const
 {
     return m_RBUS;
+}
+
+AccessoryManager *Z21Server::getAccessoryMgr() const
+{
+    return m_accessoryMgr;
 }
