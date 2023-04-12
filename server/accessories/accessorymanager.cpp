@@ -32,5 +32,5 @@ void AccessoryManager::setAccessoryState(int index, int port, bool val)
     m_server->m_z21->setTrntInfo(address, val);
 
     //HACK: notify from LocoNet
-    notifyz21LNdetector(0, 0x80, address);
+    //notifyz21LNdetector(0, 0x80, address);
 }
