@@ -113,7 +113,7 @@ extern "C" void notifyz21S88Data(uint8_t group)
     if(!m_instance)
         return;
 
-    m_instance->m_RBUS->sendS88Status(group);
+    m_instance->getRBUS()->sendS88Status(group);
 }
 
 //extern uint16_t notifyz21Railcom() __attribute__((weak));	//return global Railcom Adr
