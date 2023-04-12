@@ -3,6 +3,8 @@
 #include "server/z21server.h"
 #include "z21library/z21.h"
 
+extern "C" void notifyz21LNdetector(uint8_t client, uint8_t typ, uint16_t Adr);
+
 AccessoryManager::AccessoryManager(Z21Server *server) :
     QObject(server),
     m_server(server)
@@ -28,4 +30,7 @@ void AccessoryManager::setAccessoryState(int index, int port, bool val)
 
     const uint16_t address = index * 8 + port;
     m_server->m_z21->setTrntInfo(address, val);
+
+    //HACK: notify from LocoNet
+    notifyz21LNdetector(0, 0x80, address);
 }

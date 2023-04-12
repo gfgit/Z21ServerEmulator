@@ -65,7 +65,23 @@ extern "C" void notifyz21EthSend(uint8_t client, uint8_t *data)
         m_instance->sendDatagram(client, reinterpret_cast<const char *>(data), data[0]);
 }
 
-//extern void notifyz21LNdetector(uint8_t client, uint8_t typ, uint16_t Adr) __attribute__((weak));
+extern "C" void notifyz21LNdetector(uint8_t client, uint8_t typ, uint16_t Adr)
+{
+    if(!m_instance)
+        return;
+
+    if (typ == 0x80)
+    {
+        //"Stationary Interrogate Request" (SIC)
+        byte data[4];
+        data[0] = 0x01; //Typ
+        data[1] = Adr & 0xFF;
+        data[2] = Adr >> 8;
+        data[3] = m_instance->getAccessoryMgr()->getAccessoryState(Adr); //Condition of feedback
+
+        m_instance->m_z21->setLNDetector(client, data, 4);
+    }
+}
 //extern uint8_t notifyz21LNdispatch(uint16_t Adr) __attribute__((weak));
 //extern void notifyz21LNSendPacket(uint8_t *data, uint8_t length) __attribute__((weak));
 
