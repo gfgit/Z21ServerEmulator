@@ -6,6 +6,7 @@
 
 #include "server/retroaction/rbusretroaction.h"
 #include "server/accessories/accessorymanager.h"
+#include "server/loco/locomanager.h"
 
 #include <iostream> //console debugging
 
@@ -125,20 +126,108 @@ extern "C" void notifyz21Accessory(uint16_t Adr, bool state, bool active)
 
 //extern void notifyz21ExtAccessory(uint16_t Adr, byte state) __attribute__((weak));
 
-extern void notifyz21LocoState(uint16_t Adr, uint8_t data[]) __attribute__((weak));
-extern void notifyz21LocoFkt(uint16_t Adr, uint8_t type, uint8_t fkt) __attribute__((weak));
-extern void notifyz21LocoFkt0to4(uint16_t Adr, uint8_t fkt) __attribute__((weak));
-extern void notifyz21LocoFkt5to8(uint16_t Adr, uint8_t fkt) __attribute__((weak));
-extern void notifyz21LocoFkt9to12(uint16_t Adr, uint8_t fkt) __attribute__((weak));
-extern void notifyz21LocoFkt13to20(uint16_t Adr, uint8_t fkt) __attribute__((weak));
-extern void notifyz21LocoFkt21to28(uint16_t Adr, uint8_t fkt) __attribute__((weak));
-extern void notifyz21LocoFkt29to36(uint16_t Adr, uint8_t fkt) __attribute__((weak));
-extern void notifyz21LocoFkt37to44(uint16_t Adr, uint8_t fkt) __attribute__((weak));
-extern void notifyz21LocoFkt45to52(uint16_t Adr, uint8_t fkt) __attribute__((weak));
-extern void notifyz21LocoFkt53to60(uint16_t Adr, uint8_t fkt) __attribute__((weak));
-extern void notifyz21LocoFkt61to68(uint16_t Adr, uint8_t fkt) __attribute__((weak));
-extern void notifyz21LocoFktExt(uint16_t Adr, uint8_t low, uint8_t high) __attribute__((weak));
-extern void notifyz21LocoSpeed(uint16_t Adr, uint8_t speed, uint8_t steps) __attribute__((weak));
+extern "C" void notifyz21LocoState(uint16_t Adr, uint8_t data[])
+{
+    if(!m_instance)
+        return;
+
+    m_instance->getLocoMgr()->getLocoData(Adr, data);
+}
+
+extern "C" void notifyz21LocoFkt(uint16_t Adr, uint8_t type, uint8_t fkt)
+{
+    if(!m_instance)
+        return;
+
+    m_instance->getLocoMgr()->setLocoFuncHelper(Adr, type, fkt);
+}
+
+extern "C" void notifyz21LocoFkt0to4(uint16_t Adr, uint8_t fkt)
+{
+    if(!m_instance)
+        return;
+
+    auto locoMgr = m_instance->getLocoMgr();
+    uint8_t Slot = locoMgr->getSlotForAddress(Adr);
+    locoMgr->loco_slots[Slot].setFunctions0to4(fkt);
+    emit locoMgr->locoSlotChanged(Slot);
+}
+
+extern void notifyz21LocoFkt5to8(uint16_t Adr, uint8_t fkt)
+{
+    if(!m_instance)
+        return;
+
+    auto locoMgr = m_instance->getLocoMgr();
+    uint8_t Slot = locoMgr->getSlotForAddress(Adr);
+    locoMgr->loco_slots[Slot].setFunctions5to8(fkt);
+    emit locoMgr->locoSlotChanged(Slot);
+}
+
+extern void notifyz21LocoFkt9to12(uint16_t Adr, uint8_t fkt)
+{
+    if(!m_instance)
+        return;
+
+    auto locoMgr = m_instance->getLocoMgr();
+    uint8_t Slot = locoMgr->getSlotForAddress(Adr);
+    locoMgr->loco_slots[Slot].setFunctions9to12(fkt);
+    emit locoMgr->locoSlotChanged(Slot);
+}
+
+extern void notifyz21LocoFkt13to20(uint16_t Adr, uint8_t fkt)
+{
+    if(!m_instance)
+        return;
+
+    auto locoMgr = m_instance->getLocoMgr();
+    uint8_t Slot = locoMgr->getSlotForAddress(Adr);
+    locoMgr->loco_slots[Slot].setFunctions13to20(fkt);
+    emit locoMgr->locoSlotChanged(Slot);
+}
+
+extern void notifyz21LocoFkt21to28(uint16_t Adr, uint8_t fkt)
+{
+    if(!m_instance)
+        return;
+
+    auto locoMgr = m_instance->getLocoMgr();
+    uint8_t Slot = locoMgr->getSlotForAddress(Adr);
+    locoMgr->loco_slots[Slot].setFunctions21to28(fkt);
+    emit locoMgr->locoSlotChanged(Slot);
+}
+
+extern void notifyz21LocoFkt29to36(uint16_t Adr, uint8_t fkt)
+{
+    if(!m_instance)
+        return;
+
+    auto locoMgr = m_instance->getLocoMgr();
+    uint8_t Slot = locoMgr->getSlotForAddress(Adr);
+    locoMgr->loco_slots[Slot].setFunctions29to36(fkt);
+    emit locoMgr->locoSlotChanged(Slot);
+}
+
+//extern void notifyz21LocoFkt37to44(uint16_t Adr, uint8_t fkt) __attribute__((weak));
+//extern void notifyz21LocoFkt45to52(uint16_t Adr, uint8_t fkt) __attribute__((weak));
+//extern void notifyz21LocoFkt53to60(uint16_t Adr, uint8_t fkt) __attribute__((weak));
+//extern void notifyz21LocoFkt61to68(uint16_t Adr, uint8_t fkt) __attribute__((weak));
+//extern void notifyz21LocoFktExt(uint16_t Adr, uint8_t low, uint8_t high) __attribute__((weak));
+
+extern "C" void notifyz21LocoSpeed(uint16_t Adr, uint8_t speed, uint8_t steps)
+{
+    if(!m_instance)
+        return;
+
+    auto locoMgr = m_instance->getLocoMgr();
+
+    switch (steps)
+    {
+    case 14: locoMgr->setSpeed14(Adr, speed); break;
+    case 28: locoMgr->setSpeed28(Adr, speed); break;
+    default: locoMgr->setSpeed128(Adr, speed);
+    }
+}
 
 extern "C" void notifyz21S88Data(uint8_t group)
 {
@@ -172,6 +261,7 @@ Z21Server::Z21Server(QObject *parent) :
     m_z21 = new z21Class;
     m_RBUS = new RBusRetroaction(this);
     m_accessoryMgr = new AccessoryManager(this);
+    m_locoMgr = new LocoManager(this);
 
     m_server = new QUdpSocket(this);
     connect(m_server, &QUdpSocket::readyRead, this, &Z21Server::readPendingDatagram);
@@ -286,4 +376,9 @@ RBusRetroaction *Z21Server::getRBUS() const
 AccessoryManager *Z21Server::getAccessoryMgr() const
 {
     return m_accessoryMgr;
+}
+
+LocoManager *Z21Server::getLocoMgr() const
+{
+    return m_locoMgr;
 }

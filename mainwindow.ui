@@ -40,6 +40,16 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="locoTab">
+       <attribute name="title">
+        <string>Locomotives</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QTableView" name="locoTableView"/>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>

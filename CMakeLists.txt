@@ -34,6 +34,11 @@ set(PROJECT_SOURCES
         server/accessories/accessorymodel.h
         server/accessories/accessorymodel.cpp
 
+        server/loco/locomanager.h
+        server/loco/locomanager.cpp
+        server/loco/locodrivemodel.h
+        server/loco/locodrivemodel.cpp
+
         widgets/powerstatusled.h
         widgets/powerstatusled.cpp
 

@@ -12,6 +12,7 @@ class PowerStatusLED;
 class QComboBox;
 class RBusInputModel;
 class AccessoryModel;
+class LocoDriveModel;
 
 class MainWindow : public QMainWindow
 {
@@ -36,5 +37,6 @@ private:
     Z21Server *m_server = nullptr;
     RBusInputModel *rbusModel;
     AccessoryModel *accessoryModel;
+    LocoDriveModel *locoModel;
 };
 #endif // MAINWINDOW_H

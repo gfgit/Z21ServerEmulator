@@ -23,7 +23,7 @@ void init_millis();
 //void arduino_loop();
 
 //Debugging
-#define SERIALDEBUG
+//#define SERIALDEBUG
 
 enum SerialEmuBase
 {

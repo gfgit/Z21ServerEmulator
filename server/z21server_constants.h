@@ -23,6 +23,15 @@ QString getPowerStateName(PowerState state); //Implemented in z21server.cpp
 
 constexpr int S88_MODULE_COUNT = 62;
 constexpr int ACCESSORY_COUNT = 1024;
+constexpr int MAX_LOCO_SLOTS = 15;
+
+//DCC Speed Steps
+enum class DCCSpeedSteps
+{
+    _14 =  0x01,
+    _28 =  0x02,
+    _128 = 0x03
+};
 
 } // namespace Z21
 

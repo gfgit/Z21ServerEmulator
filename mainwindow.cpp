@@ -4,6 +4,7 @@
 #include "server/z21server.h"
 #include "server/retroaction/rbusinputmodel.h"
 #include "server/accessories/accessorymodel.h"
+#include "server/loco/locodrivemodel.h"
 
 #include "widgets/powerstatusled.h"
 #include <QComboBox>
@@ -42,6 +43,10 @@ MainWindow::MainWindow(QWidget *parent)
     //Accessory Tab
     accessoryModel = new AccessoryModel(this);
     ui->accessoryTableView->setModel(accessoryModel);
+
+    //Loco Tab
+    locoModel = new LocoDriveModel(this);
+    ui->locoTableView->setModel(locoModel);
 }
 
 MainWindow::~MainWindow()
@@ -67,6 +72,7 @@ void MainWindow::setupConnections(Z21Server *z21)
 
     rbusModel->setRetroAction(m_server->getRBUS());
     accessoryModel->setAccessoryMgr(m_server->getAccessoryMgr());
+    locoModel->setLocoMgr(m_server->getLocoMgr());
 }
 
 void MainWindow::onPowerStateChanged(int state)

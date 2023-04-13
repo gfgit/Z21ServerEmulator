@@ -12,6 +12,7 @@ class z21Class;
 
 class RBusRetroaction;
 class AccessoryManager;
+class LocoManager;
 
 extern "C" void notifyz21getSystemInfo(uint8_t client);
 extern "C" void notifyz21EthSend(uint8_t client, uint8_t *data);
@@ -35,6 +36,8 @@ public:
 
     AccessoryManager *getAccessoryMgr() const;
 
+    LocoManager *getLocoMgr() const;
+
 signals:
     void powerStateChanged(int state);
 
@@ -56,6 +59,7 @@ private:
 
     friend class RBusRetroaction;
     friend class AccessoryManager;
+    friend class LocoManager;
 
     z21Class *m_z21 = nullptr;
 
@@ -76,6 +80,7 @@ private:
 
     RBusRetroaction *m_RBUS = nullptr;
     AccessoryManager *m_accessoryMgr = nullptr;
+    LocoManager *m_locoMgr = nullptr;
 };
 
 #endif // Z21SERVER_H
