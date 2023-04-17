@@ -8,6 +8,10 @@
 #include "server/accessories/accessorymanager.h"
 #include "server/loco/locomanager.h"
 
+#ifdef WITH_LOCONET2
+#include "server/loconet/loconetz21adapter.h"
+#endif
+
 #include <iostream> //console debugging
 
 namespace Z21 {
@@ -84,7 +88,16 @@ extern "C" void notifyz21LNdetector(uint8_t client, uint8_t typ, uint16_t Adr)
     }
 }
 //extern uint8_t notifyz21LNdispatch(uint16_t Adr) __attribute__((weak));
-//extern void notifyz21LNSendPacket(uint8_t *data, uint8_t length) __attribute__((weak));
+
+extern "C" void notifyz21LNSendPacket(uint8_t *data, uint8_t length)
+{
+    if(!m_instance)
+        return;
+
+#ifdef WITH_LOCONET2
+    m_instance->getLocoNetAdapter()->injectLNPacketFromZ21(data, length);
+#endif
+}
 
 //extern void notifyz21CANdetector(uint8_t client, uint8_t typ, uint16_t ID) __attribute__((weak));
 
@@ -263,6 +276,10 @@ Z21Server::Z21Server(QObject *parent) :
     m_accessoryMgr = new AccessoryManager(this);
     m_locoMgr = new LocoManager(this);
 
+#ifdef WITH_LOCONET2
+    m_locoNetAdapter = new LocoNetZ21Adapter(this);
+#endif
+
     m_server = new QUdpSocket(this);
     connect(m_server, &QUdpSocket::readyRead, this, &Z21Server::readPendingDatagram);
 }
@@ -289,6 +306,7 @@ void Z21Server::setPower(Z21::PowerState state)
     if(state == getPower())
     {
         std::cerr << "Z21 POWER NOTIFY SAME: " << int(state) << std::endl << std::flush;
+        return;
     }
 
     m_z21->setPower(byte(state));
@@ -381,4 +399,9 @@ AccessoryManager *Z21Server::getAccessoryMgr() const
 LocoManager *Z21Server::getLocoMgr() const
 {
     return m_locoMgr;
+}
+
+LocoNetZ21Adapter *Z21Server::getLocoNetAdapter() const
+{
+    return m_locoNetAdapter;
 }

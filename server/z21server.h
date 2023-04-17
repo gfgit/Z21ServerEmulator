@@ -14,6 +14,10 @@ class RBusRetroaction;
 class AccessoryManager;
 class LocoManager;
 
+#ifdef WITH_LOCONET2
+class LocoNetZ21Adapter;
+#endif
+
 extern "C" void notifyz21getSystemInfo(uint8_t client);
 extern "C" void notifyz21EthSend(uint8_t client, uint8_t *data);
 extern "C" void notifyz21RailPower(uint8_t State);
@@ -38,6 +42,10 @@ public:
 
     LocoManager *getLocoMgr() const;
 
+#ifdef WITH_LOCONET2
+    LocoNetZ21Adapter *getLocoNetAdapter() const;
+#endif
+
 signals:
     void powerStateChanged(int state);
 
@@ -60,6 +68,7 @@ private:
     friend class RBusRetroaction;
     friend class AccessoryManager;
     friend class LocoManager;
+    friend class LocoNetZ21Adapter;
 
     z21Class *m_z21 = nullptr;
 
@@ -81,6 +90,10 @@ private:
     RBusRetroaction *m_RBUS = nullptr;
     AccessoryManager *m_accessoryMgr = nullptr;
     LocoManager *m_locoMgr = nullptr;
+
+#ifdef WITH_LOCONET2
+    LocoNetZ21Adapter *m_locoNetAdapter = nullptr;
+#endif
 };
 
 #endif // Z21SERVER_H

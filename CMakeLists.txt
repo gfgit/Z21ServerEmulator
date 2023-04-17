@@ -14,6 +14,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network)
 
+set(LOCONET2_DIR "" CACHE PATH "Path to LocoNet2 library")
+
 set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
@@ -38,6 +40,11 @@ set(PROJECT_SOURCES
         server/loco/locomanager.cpp
         server/loco/locodrivemodel.h
         server/loco/locodrivemodel.cpp
+
+        server/loconet/loconetz21adapter.h
+        server/loconet/loconetz21adapter.cpp
+        server/loconet/loconetz21source.h
+        server/loconet/loconetz21source.cpp
 
         widgets/powerstatusled.h
         widgets/powerstatusled.cpp
@@ -76,6 +83,15 @@ else()
 endif()
 
 target_include_directories(Z21ServerEmulator PRIVATE z21library arduino_compat)
+
+# LocoNet support
+if(EXISTS ${LOCONET2_DIR})
+    target_include_directories(Z21ServerEmulator PRIVATE ${LOCONET2_DIR})
+    target_compile_definitions(Z21ServerEmulator PRIVATE WITH_LOCONET2=1)
+    target_sources(Z21ServerEmulator PRIVATE
+        ${LOCONET2_DIR}/LocoNet2.cpp
+        ${LOCONET2_DIR}/LocoNetMessageBuffer.cpp)
+endif()
 
 target_link_libraries(Z21ServerEmulator PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)
 
