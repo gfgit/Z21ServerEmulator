@@ -31,7 +31,7 @@ private slots:
 private:
     LocoNetTcpSource *m_source;
 
-    QTcpServer *m_server;
+    QTcpServer *m_tcpServer;
 
     struct Client
     {

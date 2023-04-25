@@ -13,14 +13,14 @@ LocoNetTCPBinaryServer::LocoNetTCPBinaryServer(LocoNetBusHolder *bus, QObject *p
 {
     m_source = new LocoNetTcpSource(&bus->bus, this);
 
-    m_server = new QTcpServer(this);
-    connect(m_server, &QTcpServer::newConnection,
+    m_tcpServer = new QTcpServer(this);
+    connect(m_tcpServer, &QTcpServer::newConnection,
             this, &LocoNetTCPBinaryServer::handleNewClient);
 }
 
 bool LocoNetTCPBinaryServer::startServer(int port)
 {
-    return m_server->listen(QHostAddress::Any, port);
+    return m_tcpServer->listen(QHostAddress::Any, port);
 }
 
 bool LocoNetTCPBinaryServer::broadcastMessage(const uint8_t *msg, int size)
@@ -40,11 +40,11 @@ bool LocoNetTCPBinaryServer::broadcastMessage(const uint8_t *msg, int size)
 
 void LocoNetTCPBinaryServer::handleNewClient()
 {
-    if(!m_server->hasPendingConnections())
+    if(!m_tcpServer->hasPendingConnections())
         return;
 
     Client client;
-    client.sock = m_server->nextPendingConnection();
+    client.sock = m_tcpServer->nextPendingConnection();
 
     connect(client.sock, &QTcpSocket::disconnected, this, [this, sock=client.sock]()
             {
