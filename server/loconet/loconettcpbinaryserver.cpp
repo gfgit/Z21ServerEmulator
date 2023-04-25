@@ -88,7 +88,14 @@ void LocoNetTCPBinaryServer::handleSockData(QTcpSocket *sock)
     {
         LnMsg *msg = client->buf.addByte(b);
         if(msg)
+        {
+            //Send packet for processing
             m_source->sendRaw(*msg);
+
+            //Echo back to client to tell message arrived succesfully
+            //NOTE: seems to be the way LBServer works and Traintastic expects it
+            sock->write(reinterpret_cast<const char *>(msg->data), msg->length());
+        }
     }
 }
 
