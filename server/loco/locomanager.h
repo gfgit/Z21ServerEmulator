@@ -9,12 +9,6 @@ class Z21Server;
 
 extern "C" void notifyz21LocoState(uint16_t Adr, uint8_t data[]);
 extern "C" void notifyz21LocoFkt(uint16_t Adr, uint8_t type, uint8_t fkt);
-extern "C" void notifyz21LocoFkt0to4(uint16_t Adr, uint8_t fkt);
-extern "C" void notifyz21LocoFkt5to8(uint16_t Adr, uint8_t fkt);
-extern "C" void notifyz21LocoFkt9to12(uint16_t Adr, uint8_t fkt);
-extern "C" void notifyz21LocoFkt13to20(uint16_t Adr, uint8_t fkt);
-extern "C" void notifyz21LocoFkt21to28(uint16_t Adr, uint8_t fkt);
-extern "C" void notifyz21LocoFkt29to36(uint16_t Adr, uint8_t fkt);
 
 
 struct LocoSlot
@@ -131,23 +125,63 @@ public:
     bool setSpeed28(uint16_t address, uint8_t speed);
     bool setSpeed128(uint16_t address, uint8_t speed);
 
+    void setFunctions0to4(uint16_t address, uint8_t func)
+    {
+        uint8_t Slot = getSlotForAddress(address);
+        loco_slots[Slot].setFunctions0to4(func);
+        emit locoSlotChanged(Slot);
+    }
+
+    void setFunctions5to8(uint16_t address, uint8_t func)
+    {
+        uint8_t Slot = getSlotForAddress(address);
+        loco_slots[Slot].setFunctions5to8(func);
+        emit locoSlotChanged(Slot);
+    }
+
+    void setFunctions9to12(uint16_t address, uint8_t func)
+    {
+        uint8_t Slot = getSlotForAddress(address);
+        loco_slots[Slot].setFunctions9to12(func);
+        emit locoSlotChanged(Slot);
+    }
+
+    void setFunctions13to20(uint16_t address, uint8_t func)
+    {
+        uint8_t Slot = getSlotForAddress(address);
+        loco_slots[Slot].setFunctions13to20(func);
+        emit locoSlotChanged(Slot);
+    }
+
+    void setFunctions21to28(uint16_t address, uint8_t func)
+    {
+        uint8_t Slot = getSlotForAddress(address);
+        loco_slots[Slot].setFunctions21to28(func);
+        emit locoSlotChanged(Slot);
+    }
+
+    void setFunctions29to36(uint16_t address, uint8_t func)
+    {
+        uint8_t Slot = getSlotForAddress(address);
+        loco_slots[Slot].setFunctions29to36(func);
+        emit locoSlotChanged(Slot);
+    }
+
 signals:
     void locoSlotChanged(int Slot);
+    void locoSlotRequested(int address);
 
 private:
     friend class LocoDriveModel;
+    friend class LocoNetZ21Adapter;
+    friend class LoconetSlotServer;
     friend void notifyz21LocoState(uint16_t Adr, uint8_t data[]);
     friend void notifyz21LocoFkt(uint16_t Adr, uint8_t type, uint8_t fkt);
-    friend void notifyz21LocoFkt0to4(uint16_t Adr, uint8_t fkt);
-    friend void notifyz21LocoFkt5to8(uint16_t Adr, uint8_t fkt);
-    friend void notifyz21LocoFkt9to12(uint16_t Adr, uint8_t fkt);
-    friend void notifyz21LocoFkt13to20(uint16_t Adr, uint8_t fkt);
-    friend void notifyz21LocoFkt21to28(uint16_t Adr, uint8_t fkt);
-    friend void notifyz21LocoFkt29to36(uint16_t Adr, uint8_t fkt);
 
     void initSlot(uint8_t Slot, uint16_t address);
     uint8_t getSlotForAddress(uint16_t address);
-    void getLocoData(uint16_t address, uint8_t loco_data[]);
+    void getLocoData(uint8_t Slot, uint8_t loco_data[6]);
+    void getLocoDataForAddress(uint16_t address, uint8_t loco_data[6]);
     void setLocoFuncHelper(uint16_t address, uint8_t type, uint8_t fkt);
     void updateZ21LocoState(uint16_t address);
 

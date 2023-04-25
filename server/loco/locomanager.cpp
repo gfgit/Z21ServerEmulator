@@ -114,16 +114,23 @@ uint8_t LocoManager::getSlotForAddress(uint16_t address)
     return Slot;
 }
 
-void LocoManager::getLocoData(uint16_t address, uint8_t loco_data[])
+void LocoManager::getLocoData(uint8_t Slot, uint8_t loco_data[])
 {
     //uint8_t Steps, uint8_t Speed, uint8_t F0, uint8_t F1, uint8_t F2, uint8_t F3		==> F0 bis F31
-    uint8_t Slot = getSlotForAddress(address);
     loco_data[0] = loco_slots[Slot].adr >> 14; 	//Steps
     loco_data[1] = loco_slots[Slot].speed;
     loco_data[2] = loco_slots[Slot].f0;	//F31 F30 F29 F0 - F4 F3 F2 F1
     loco_data[3] = loco_slots[Slot].f1;	//F12 - F5
     loco_data[4] = loco_slots[Slot].f2;	//F20 - F13
     loco_data[5] = loco_slots[Slot].f3;	//F28 - F21
+
+    emit locoSlotRequested(loco_slots[Slot].address());
+}
+
+void LocoManager::getLocoDataForAddress(uint16_t address, uint8_t loco_data[])
+{
+    uint8_t Slot = getSlotForAddress(address);
+    getLocoData(Slot, loco_data);
 }
 
 void LocoManager::setLocoFuncHelper(uint16_t address, uint8_t type, uint8_t fkt)

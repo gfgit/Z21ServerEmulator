@@ -144,7 +144,7 @@ extern "C" void notifyz21LocoState(uint16_t Adr, uint8_t data[])
     if(!m_instance)
         return;
 
-    m_instance->getLocoMgr()->getLocoData(Adr, data);
+    m_instance->getLocoMgr()->getLocoDataForAddress(Adr, data);
 }
 
 extern "C" void notifyz21LocoFkt(uint16_t Adr, uint8_t type, uint8_t fkt)
@@ -160,10 +160,7 @@ extern "C" void notifyz21LocoFkt0to4(uint16_t Adr, uint8_t fkt)
     if(!m_instance)
         return;
 
-    auto locoMgr = m_instance->getLocoMgr();
-    uint8_t Slot = locoMgr->getSlotForAddress(Adr);
-    locoMgr->loco_slots[Slot].setFunctions0to4(fkt);
-    emit locoMgr->locoSlotChanged(Slot);
+    m_instance->getLocoMgr()->setFunctions0to4(Adr, fkt);
 }
 
 extern void notifyz21LocoFkt5to8(uint16_t Adr, uint8_t fkt)
@@ -171,10 +168,7 @@ extern void notifyz21LocoFkt5to8(uint16_t Adr, uint8_t fkt)
     if(!m_instance)
         return;
 
-    auto locoMgr = m_instance->getLocoMgr();
-    uint8_t Slot = locoMgr->getSlotForAddress(Adr);
-    locoMgr->loco_slots[Slot].setFunctions5to8(fkt);
-    emit locoMgr->locoSlotChanged(Slot);
+    m_instance->getLocoMgr()->setFunctions5to8(Adr, fkt);
 }
 
 extern void notifyz21LocoFkt9to12(uint16_t Adr, uint8_t fkt)
@@ -182,10 +176,7 @@ extern void notifyz21LocoFkt9to12(uint16_t Adr, uint8_t fkt)
     if(!m_instance)
         return;
 
-    auto locoMgr = m_instance->getLocoMgr();
-    uint8_t Slot = locoMgr->getSlotForAddress(Adr);
-    locoMgr->loco_slots[Slot].setFunctions9to12(fkt);
-    emit locoMgr->locoSlotChanged(Slot);
+    m_instance->getLocoMgr()->setFunctions9to12(Adr, fkt);
 }
 
 extern void notifyz21LocoFkt13to20(uint16_t Adr, uint8_t fkt)
@@ -193,10 +184,7 @@ extern void notifyz21LocoFkt13to20(uint16_t Adr, uint8_t fkt)
     if(!m_instance)
         return;
 
-    auto locoMgr = m_instance->getLocoMgr();
-    uint8_t Slot = locoMgr->getSlotForAddress(Adr);
-    locoMgr->loco_slots[Slot].setFunctions13to20(fkt);
-    emit locoMgr->locoSlotChanged(Slot);
+    m_instance->getLocoMgr()->setFunctions13to20(Adr, fkt);
 }
 
 extern void notifyz21LocoFkt21to28(uint16_t Adr, uint8_t fkt)
@@ -204,10 +192,7 @@ extern void notifyz21LocoFkt21to28(uint16_t Adr, uint8_t fkt)
     if(!m_instance)
         return;
 
-    auto locoMgr = m_instance->getLocoMgr();
-    uint8_t Slot = locoMgr->getSlotForAddress(Adr);
-    locoMgr->loco_slots[Slot].setFunctions21to28(fkt);
-    emit locoMgr->locoSlotChanged(Slot);
+    m_instance->getLocoMgr()->setFunctions21to28(Adr, fkt);
 }
 
 extern void notifyz21LocoFkt29to36(uint16_t Adr, uint8_t fkt)
@@ -215,10 +200,7 @@ extern void notifyz21LocoFkt29to36(uint16_t Adr, uint8_t fkt)
     if(!m_instance)
         return;
 
-    auto locoMgr = m_instance->getLocoMgr();
-    uint8_t Slot = locoMgr->getSlotForAddress(Adr);
-    locoMgr->loco_slots[Slot].setFunctions29to36(fkt);
-    emit locoMgr->locoSlotChanged(Slot);
+    m_instance->getLocoMgr()->setFunctions29to36(Adr, fkt);
 }
 
 //extern void notifyz21LocoFkt37to44(uint16_t Adr, uint8_t fkt) __attribute__((weak));
