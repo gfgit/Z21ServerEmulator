@@ -68,12 +68,16 @@ private:
     friend class RBusRetroaction;
     friend class AccessoryManager;
     friend class LocoManager;
+
+#ifdef WITH_LOCONET2
     friend class LocoNetZ21Adapter;
+    friend class LoconetSlotServer;
+#endif
 
     z21Class *m_z21 = nullptr;
 
 private:
-    QUdpSocket *m_server = nullptr;
+    QUdpSocket *m_udpServer = nullptr;
 
     struct Client
     {

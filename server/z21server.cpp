@@ -10,6 +10,7 @@
 
 #ifdef WITH_LOCONET2
 #include "server/loconet/loconetz21adapter.h"
+#include "server/loconet/loconetslotserver.h"
 #endif
 
 #include <iostream> //console debugging
@@ -87,7 +88,20 @@ extern "C" void notifyz21LNdetector(uint8_t client, uint8_t typ, uint16_t Adr)
         m_instance->m_z21->setLNDetector(client, data, 4);
     }
 }
-//extern uint8_t notifyz21LNdispatch(uint16_t Adr) __attribute__((weak));
+
+extern uint8_t notifyz21LNdispatch(uint16_t Adr)
+{
+    //return the Slot that was dispatched, 0xFF at error!
+    //TODO: error returns 0 instead of 0xFF
+    if(!m_instance)
+        return 0;
+
+#ifdef WITH_LOCONET2
+    return m_instance->getLocoNetAdapter()->getSlotServer()->LNdispatch(Adr);
+#else
+    return 0;
+#endif
+}
 
 extern "C" void notifyz21LNSendPacket(uint8_t *data, uint8_t length)
 {
@@ -262,21 +276,21 @@ Z21Server::Z21Server(QObject *parent) :
     m_locoNetAdapter = new LocoNetZ21Adapter(this);
 #endif
 
-    m_server = new QUdpSocket(this);
-    connect(m_server, &QUdpSocket::readyRead, this, &Z21Server::readPendingDatagram);
+    m_udpServer = new QUdpSocket(this);
+    connect(m_udpServer, &QUdpSocket::readyRead, this, &Z21Server::readPendingDatagram);
 }
 
 Z21Server::~Z21Server()
 {
     delete m_z21;
-    m_server->close();
+    m_udpServer->close();
 
     m_instance = nullptr;
 }
 
 bool Z21Server::startServer(quint16 port)
 {
-    if(!m_server->bind(port))
+    if(!m_udpServer->bind(port))
         return false;
 
     setPower(Z21::PowerState::Normal);
@@ -302,12 +316,12 @@ Z21::PowerState Z21Server::getPower() const
 
 void Z21Server::readPendingDatagram()
 {
-    while(m_server->hasPendingDatagrams())
+    while(m_udpServer->hasPendingDatagrams())
     {
         //Receive datagram
         char buffer[Z21::Z21_UDP_TX_MAX_SIZE] = {};
         Client client;
-        m_server->readDatagram(buffer, Z21::Z21_UDP_TX_MAX_SIZE, &client.remoteAddr, &client.remotePort);
+        m_udpServer->readDatagram(buffer, Z21::Z21_UDP_TX_MAX_SIZE, &client.remoteAddr, &client.remotePort);
 
         //Register client
         int clientIdx = addClientAndGetIndex(client);
@@ -342,7 +356,7 @@ void Z21Server::sendDatagram(int clientIdx, const char *data, const qint64 size)
             if(!client.remotePort || client.remoteAddr.isNull())
                 continue; //Skip invalid clients
 
-            m_server->writeDatagram(data, size, client.remoteAddr, client.remotePort);
+            m_udpServer->writeDatagram(data, size, client.remoteAddr, client.remotePort);
         }
     }
     else
@@ -351,7 +365,7 @@ void Z21Server::sendDatagram(int clientIdx, const char *data, const qint64 size)
         if(!client.remotePort || client.remoteAddr.isNull())
             return; //Skip invalid clients
 
-        m_server->writeDatagram(data, size, client.remoteAddr, client.remotePort);
+        m_udpServer->writeDatagram(data, size, client.remoteAddr, client.remotePort);
     }
 }
 
