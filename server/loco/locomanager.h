@@ -166,6 +166,7 @@ public:
         uint8_t Slot = getSlotForAddress(address);
         loco_slots[Slot].setFunctions0to4(func);
         emit locoSlotChanged(Slot);
+        emit locoFuncChanged(address, 0); //First is enough to trigger batch
     }
 
     void setFunctions5to8(uint16_t address, uint8_t func)
@@ -173,6 +174,7 @@ public:
         uint8_t Slot = getSlotForAddress(address);
         loco_slots[Slot].setFunctions5to8(func);
         emit locoSlotChanged(Slot);
+        emit locoFuncChanged(address, 5); //First is enough to trigger batch
     }
 
     void setFunctions9to12(uint16_t address, uint8_t func)
@@ -180,6 +182,7 @@ public:
         uint8_t Slot = getSlotForAddress(address);
         loco_slots[Slot].setFunctions9to12(func);
         emit locoSlotChanged(Slot);
+        emit locoFuncChanged(address, 9); //First is enough to trigger batch
     }
 
     void setFunctions13to20(uint16_t address, uint8_t func)
@@ -187,6 +190,7 @@ public:
         uint8_t Slot = getSlotForAddress(address);
         loco_slots[Slot].setFunctions13to20(func);
         emit locoSlotChanged(Slot);
+        emit locoFuncChanged(address, 13); //First is enough to trigger batch
     }
 
     void setFunctions21to28(uint16_t address, uint8_t func)
@@ -194,6 +198,7 @@ public:
         uint8_t Slot = getSlotForAddress(address);
         loco_slots[Slot].setFunctions21to28(func);
         emit locoSlotChanged(Slot);
+        emit locoFuncChanged(address, 21); //First is enough to trigger batch
     }
 
     void setFunctions29to36(uint16_t address, uint8_t func)
@@ -201,6 +206,7 @@ public:
         uint8_t Slot = getSlotForAddress(address);
         loco_slots[Slot].setFunctions29to36(func);
         emit locoSlotChanged(Slot);
+        emit locoFuncChanged(address, 29); //First is enough to trigger batch
     }
 
     bool getLocoDir(uint16_t address)

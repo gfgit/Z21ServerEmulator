@@ -9,6 +9,7 @@ class Z21Server;
 class LocoNetZ21Source;
 struct LocoNetBusHolder;
 class LocoNetTCPBinaryServer;
+class LoconetSlotServer;
 
 class LocoNetDispatcher;
 
@@ -20,14 +21,14 @@ public:
     LocoNetZ21Adapter(Z21Server *server);
     ~LocoNetZ21Adapter();
 
+    LoconetSlotServer *getSlotServer() const;
+
 private:
     friend void notifyz21LNSendPacket(uint8_t *data, uint8_t length);
     void injectLNPacketFromZ21(uint8_t *data, uint8_t length);
 
     friend class LocoNetZ21Source;
     bool sendLNPacketToZ21(uint8_t *data, uint8_t length);
-
-    void setZ21PowerFromLocoNet(bool on);
 
 private slots:
     void setLocoNetPowerFromZ21(int state);
@@ -39,6 +40,7 @@ private:
     LocoNetZ21Source *m_source;
     LocoNetDispatcher *m_dispatcher;
     LocoNetTCPBinaryServer *m_tcpServer;
+    LoconetSlotServer *m_slotServer;
 };
 
 #endif // LOCONETZ21ADAPTER_H

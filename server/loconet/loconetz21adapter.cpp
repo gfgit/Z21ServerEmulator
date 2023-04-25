@@ -5,8 +5,11 @@
 
 #include "loconetz21source.h"
 #include "loconettcpbinaryserver.h"
+#include "loconetslotserver.h"
 
 #include "server/z21server.h"
+#include "server/loco/locomanager.h"
+
 #include "z21library/z21.h"
 #include "z21library/z21header.h"
 
@@ -15,6 +18,12 @@
 #include <QDebug>
 #include <iostream>
 
+void log_all_traffic(const LnMsg *msg)
+{
+    std::cout << std::flush;
+    std::cerr << "LOCONET RX: " << fmtOpcode(msg->data[0]) << std::endl;
+    std::cerr << std::flush;
+}
 
 LocoNetZ21Adapter::LocoNetZ21Adapter(Z21Server *server) :
     QObject(server),
@@ -23,12 +32,47 @@ LocoNetZ21Adapter::LocoNetZ21Adapter(Z21Server *server) :
     m_busHolder = new LocoNetBusHolder;
     m_source = new LocoNetZ21Source(&m_busHolder->bus, this);
     m_dispatcher = new LocoNetDispatcher(&m_busHolder->bus);
+    m_slotServer = new LoconetSlotServer(m_busHolder, m_dispatcher, m_server, this);
+
     m_tcpServer = new LocoNetTCPBinaryServer(m_busHolder, this);
     m_tcpServer->startServer();
 
+    auto powerStateHandler = [this](const LnMsg *msg)
+    {
+        Z21::PowerState curState = m_server->getPower();
+        Z21::PowerState newState = curState;
+
+        switch(msg->sz.command)
+        {
+        case OPC_GPON:
+        {
+            newState = Z21::PowerState::Normal;
+            break;
+        }
+        case OPC_GPOFF:
+        {
+            if(curState != Z21::PowerState::Normal && curState != Z21::PowerState::EmergencyStop)
+                break; //Leave untouched in this case
+            newState = Z21::PowerState::TrackVoltageOff;
+            break;
+        }
+        case OPC_IDLE:
+            newState = Z21::PowerState::EmergencyStop;
+            break;
+        }
+
+        if(newState == curState)
+            return;
+
+        m_server->setPower(newState);
+    };
+
     //Register dispatcher callbacks
-    m_dispatcher->onPowerChange(std::bind(&LocoNetZ21Adapter::setZ21PowerFromLocoNet,
-                                          this, std::placeholders::_1));
+    m_dispatcher->onPacket(OPC_GPON, powerStateHandler);
+    m_dispatcher->onPacket(OPC_GPOFF, powerStateHandler);
+    m_dispatcher->onPacket(OPC_IDLE, powerStateHandler);
+
+    m_dispatcher->onPacket(CALLBACK_FOR_ALL_OPCODES, &log_all_traffic);
 
     //Register Z21 callbacks
     connect(m_server, &Z21Server::powerStateChanged,
@@ -58,32 +102,29 @@ bool LocoNetZ21Adapter::sendLNPacketToZ21(uint8_t *data, uint8_t length)
     return m_server->m_z21->setLNMessage(data, length, Z21bcLocoNet_s, true);
 }
 
-void LocoNetZ21Adapter::setZ21PowerFromLocoNet(bool on)
-{
-    Z21::PowerState curState = m_server->getPower();
-    if(!on && curState != Z21::PowerState::Normal)
-    {
-        /* NOTE: prevent infinite loop
-        This is caused by the lack of different "OFF" states in LocoNet
-        If Z21 sets a state different from Z21::PowerState::Normal
-        here we would represent it as "OFF" -> Z21::PowerState::TrackVoltageOff
-        but we should keep Z21 state unchanged
-        */
-        return; //Keep current status which is already "OFF"
-    }
-
-    Z21::PowerState newState = on ? Z21::PowerState::Normal : Z21::PowerState::TrackVoltageOff;
-    if(newState == curState)
-        return;
-
-    m_server->setPower(newState);
-}
-
 void LocoNetZ21Adapter::setLocoNetPowerFromZ21(int state)
 {
     Z21::PowerState powerState = Z21::PowerState(state);
-    bool on = powerState == Z21::PowerState::Normal;
-    reportPower(&m_busHolder->bus, on);
+    LnMsg packet;
+    switch (powerState)
+    {
+    case Z21::PowerState::Normal:
+        packet.data[0] = OPC_GPON;
+        break;
+    case Z21::PowerState::EmergencyStop:
+        packet.data[0] = OPC_IDLE;
+        break;
+    default:
+        packet.data[0] = OPC_GPOFF;
+        break;
+    }
+    writeChecksum(packet);
+    m_busHolder->bus.broadcast(packet, m_dispatcher);
+}
+
+LoconetSlotServer *LocoNetZ21Adapter::getSlotServer() const
+{
+    return m_slotServer;
 }
 
 #endif // WITH_LOCONET2
