@@ -40,6 +40,7 @@ bool LocoManager::setSpeed14(uint16_t address, uint8_t speed)
     loco_slots[Slot].speed = speed;
     loco_slots[Slot].setSpeedSteps(Z21::DCCSpeedSteps::_14);
     emit locoSlotChanged(Slot);
+    emit locoSpeedChanged(address, speed, 14);
 
     return true;
 }
@@ -56,6 +57,7 @@ bool LocoManager::setSpeed28(uint16_t address, uint8_t speed)
     loco_slots[Slot].speed = speed;
     loco_slots[Slot].setSpeedSteps(Z21::DCCSpeedSteps::_28);
     emit locoSlotChanged(Slot);
+    emit locoSpeedChanged(address, speed, 28);
 
     return true;
 }
@@ -72,8 +74,15 @@ bool LocoManager::setSpeed128(uint16_t address, uint8_t speed)
     loco_slots[Slot].speed = speed;
     loco_slots[Slot].setSpeedSteps(Z21::DCCSpeedSteps::_128);
     emit locoSlotChanged(Slot);
+    emit locoSpeedChanged(address, speed, 128);
 
     return true;
+}
+
+int LocoManager::getLocoSpeed(uint16_t address)
+{
+    uint8_t Slot = getSlotForAddress(address);
+    return loco_slots[Slot].getSpeed();
 }
 
 void LocoManager::initSlot(uint8_t Slot, uint16_t address)

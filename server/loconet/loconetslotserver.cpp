@@ -53,6 +53,14 @@ LoconetSlotServer::LoconetSlotServer(LocoNetBusHolder *bus,
                            {
                                onLocoSpeed(msg->data);
                            });
+    m_dispatcher->onPacket(OPC_LOCO_DIRF, [this](const LnMsg *msg)
+                           {
+                               onLocoDIRF(msg->data);
+                           });
+    m_dispatcher->onPacket(OPC_LOCO_SND, [this](const LnMsg *msg)
+                           {
+                               onLocoSND(msg->data);
+                           });
 }
 
 void LoconetSlotServer::LNGetLocoStatus(uint8_t Slot)
@@ -101,9 +109,9 @@ uint8_t LoconetSlotServer::LNGetSetLocoSlot(unsigned int Adr, bool add) {   //ad
     {    //add Adr to SLOT Server!
         m_slots[getSlot].Status = 0x10;   //ACTIVE - COMMON loco adr IN SLOT
 #if defined(FS14)
-        slot[getSlot].Status |= LNLOCO14;
+        m_slots[getSlot].Status |= LNLOCO14;
 #elif defined(FS28)
-        slot[getSlot].Status |= LNLOCO28;
+        m_slots[getSlot].Status |= LNLOCO28;
 #else
         m_slots[getSlot].Status |= LNLOCO128;
 #endif
@@ -142,6 +150,16 @@ void LoconetSlotServer::onLocoFuncChanged(int address, int fkt)
         sendLNF5 (address, locoMgr->getFunction21to28(address));
 }
 
+void LoconetSlotServer::onLocoSpeedChanged(int address, int speed, int steps)
+{
+    switch (steps)
+    {
+    case 14: sendLNSPD(address, speed / 14 * 128); break; //Map to 128 steps
+    case 28: sendLNSPD(address, speed / 28 * 128); break;
+    default: sendLNSPD(address, speed);
+    }
+}
+
 //Check if Slot can be dispatched
 uint8_t LoconetSlotServer::LNdispatch (uint16_t Adr)
 {
@@ -155,13 +173,13 @@ uint8_t LoconetSlotServer::LNdispatch (uint16_t Adr)
     return 0;
 }
 
-void LoconetSlotServer::onLocoAdr(const uint8_t *msg_data)
+void LoconetSlotServer::onLocoAdr(const uint8_t *LnPacketData)
 {
     //0xBF = Request loco address
 
     //add to a SLOT:
-    uint8_t newSlot = LNGetSetLocoSlot((msg_data[1] << 7) | (msg_data[2] & 0x7F), true); //ADR2:7 ms-bits = 0 bei kurzer Adr; ADR:7 ls-bit
-    if (dispatchSlot != 0 && msg_data[1] == 0 && msg_data[2] == 0)
+    uint8_t newSlot = LNGetSetLocoSlot((LnPacketData[1] << 7) | (LnPacketData[2] & 0x7F), true); //ADR2:7 ms-bits = 0 bei kurzer Adr; ADR:7 ls-bit
+    if (dispatchSlot != 0 && LnPacketData[1] == 0 && LnPacketData[2] == 0)
         newSlot = dispatchSlot;
 
     if (newSlot == 0) {
@@ -177,10 +195,10 @@ void LoconetSlotServer::onLocoAdr(const uint8_t *msg_data)
     }
 }
 
-void LoconetSlotServer::onMoveSlot(const uint8_t *msg_data)
+void LoconetSlotServer::onMoveSlot(const uint8_t *LnPacketData)
 {
     //0xBA = Move slot SRC to DST
-    if (msg_data[1] == 0) //SRC = 0
+    if (LnPacketData[1] == 0) //SRC = 0
     {
         //SLOT READ DATA of DISPATCH Slot
         if (dispatchSlot != 0)
@@ -191,17 +209,17 @@ void LoconetSlotServer::onMoveSlot(const uint8_t *msg_data)
             return;
         }
     }
-    else if (msg_data[1] == msg_data[2])
+    else if (LnPacketData[1] == LnPacketData[2])
     {  //NULL move
         //SRC=DEST is set to IN_USE , if legal move -> NULL move
-        m_slots[msg_data[1]].Status = m_slots[msg_data[1]].Status | 0x30;  //B00011111;  //IN_USE
-        LNGetLocoStatus(msg_data[1]);
+        m_slots[LnPacketData[1]].Status = m_slots[LnPacketData[1]].Status | 0x30;  //B00011111;  //IN_USE
+        LNGetLocoStatus(LnPacketData[1]);
         return;
     }
-    else if (msg_data[2] == 0) //DST = 0
+    else if (LnPacketData[2] == 0) //DST = 0
     {
         //DISPATCH Put, mark SLOT as DISPATCH;
-        dispatchSlot = msg_data[1];
+        dispatchSlot = LnPacketData[1];
         //RETURN slot status <0xE7> of DESTINATION slot DEST if move legal
         LNGetLocoStatus(dispatchSlot);
         return;
@@ -245,17 +263,17 @@ void LoconetSlotServer::LN_OPC_SL_DATA(const uint8_t *LnPacketData)
     }
 }
 
-void LoconetSlotServer::onWRData(const uint8_t *msg_data)
+void LoconetSlotServer::onWRData(const uint8_t *LnPacketData)
 {
     //Write slot data
-    uint8_t SLOT_RX = msg_data[2];
+    uint8_t SLOT_RX = LnPacketData[2];
     if (SLOT_RX < Z21::MAX_LOCO_SLOTS)
     {
         /* Slot: 0  dispatch
          *       1 - 119   active locos     */
 
 
-        LN_OPC_SL_DATA(msg_data); //send DCC message
+        LN_OPC_SL_DATA(LnPacketData); //send DCC message
 
         m_server->m_z21->setLocoStateExt(m_slots[SLOT_RX].LAdr);
 
@@ -451,6 +469,66 @@ void LoconetSlotServer::sendLNF5 (unsigned int Adr, uint8_t F5)
         answerMsg = reinterpret_cast<LnMsg *>(setF2028);
         writeChecksum(*answerMsg);
         m_busHolder->bus.broadcast(*answerMsg, m_dispatcher);
+    }
+}
+
+void LoconetSlotServer::onLocoDIRF(const uint8_t *LnPacketData)
+{
+    //0,0,DIR,F0,F4,F3,F2,F1
+    if (LnPacketData[1] < Z21::MAX_LOCO_SLOTS)
+    {
+        if (m_slots[LnPacketData[1]].LAdr == 0)
+        {
+            //Unknown!
+            return;
+        }
+
+#if defined(LnInvDir)
+        LnPacketData[2] = ((~LnPacketData[2]) & 0x20) | (LnPacketData[2] & 0x1F);
+#endif
+        auto locoMgr = m_server->getLocoMgr();
+        byte lokspeed = locoMgr->getLocoSpeed(m_slots[LnPacketData[1]].LAdr); //read current speed
+        bitWrite(lokspeed, 7, ((LnPacketData[2] >> 5) & 0x01)); //Driving Direction
+
+        if ((m_slots[LnPacketData[1]].Status & 0b111) == LNLOCO14)
+            locoMgr->setSpeed14(m_slots[LnPacketData[1]].LAdr, lokspeed ); //update DIRF in DCC library
+        else
+        {
+            if ((m_slots[LnPacketData[1]].Status & 0b111) == LNLOCO28)
+                locoMgr->setSpeed28(m_slots[LnPacketData[1]].LAdr, lokspeed ); //update DIRF in DCC library
+            else
+                locoMgr->setSpeed128(m_slots[LnPacketData[1]].LAdr, lokspeed ); //update DIRF in DCC library
+        }
+        locoMgr->setFunctions0to4(m_slots[LnPacketData[1]].LAdr, LnPacketData[2] & 0b00011111); //- F0 F4 F3 F2 F1
+
+        m_server->m_z21->setLocoStateExt (m_slots[LnPacketData[1]].LAdr);
+
+#if defined(XPRESSNET)
+        XpressNet.setFunc0to4(slot[LnPacketData[1]].LAdr, LnPacketData[2] & B00011111);
+        XpressNet.ReqLocoBusy(slot[LnPacketData[1]].LAdr);   //Lok wird nicht von LokMaus gesteuert!
+#endif
+    }
+}
+
+void LoconetSlotServer::onLocoSND(const uint8_t *LnPacketData)
+{
+    //0,0,0,0,F8,F7,F6,F5
+    if (LnPacketData[1] < Z21::MAX_LOCO_SLOTS)
+    {
+        if (m_slots[LnPacketData[1]].LAdr == 0)
+        {
+            //Unknown!
+            return;
+        }
+
+        m_server->getLocoMgr()->setFunctions5to8(m_slots[LnPacketData[1]].LAdr, LnPacketData[2]);	//- F8 F7 F6 F5
+
+        m_server->m_z21->setLocoStateExt(m_slots[LnPacketData[1]].LAdr);
+
+#if defined(XPRESSNET)
+        XpressNet.setFunc5to8(slot[LnPacketData[1]].LAdr, LnPacketData[2]);
+        XpressNet.ReqLocoBusy(slot[LnPacketData[1]].LAdr);   //Lok wird nicht von LokMaus gesteuert!
+#endif
     }
 }
 

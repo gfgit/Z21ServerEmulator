@@ -69,11 +69,14 @@ public:
 private:
     friend uint8_t notifyz21LNdispatch(uint16_t Adr);
     uint8_t LNdispatch(uint16_t Adr);
-    void onLocoAdr(const uint8_t *msg_data);
-    void onMoveSlot(const uint8_t *msg_data);
+    void onLocoAdr(const uint8_t *LnPacketData);
+    void onMoveSlot(const uint8_t *LnPacketData);
     void LN_OPC_SL_DATA(const uint8_t *LnPacketData);
-    void onWRData(const uint8_t *msg_data);
+    void onWRData(const uint8_t *LnPacketData);
     void onLocoSpeed(const uint8_t *LnPacketData);
+    void onLocoDIRF(const uint8_t *LnPacketData);
+    void onLocoSND(const uint8_t *LnPacketData);
+
     void sendLNDIRF(unsigned int Adr, uint8_t DIRF);
     void sendLNSPD(unsigned int Adr, uint8_t SPD);
     void sendLNSND(unsigned int Adr, uint8_t SND);
@@ -84,6 +87,7 @@ private:
 private slots:
     void onLocoSlotRequested(int address);
     void onLocoFuncChanged(int address, int fkt);
+    void onLocoSpeedChanged(int address, int speed, int steps);
 
 private:
     LocoNetBusHolder *m_busHolder;

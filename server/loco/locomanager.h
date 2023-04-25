@@ -124,6 +124,7 @@ public:
     bool setSpeed14(uint16_t address, uint8_t speed);
     bool setSpeed28(uint16_t address, uint8_t speed);
     bool setSpeed128(uint16_t address, uint8_t speed);
+    int getLocoSpeed(uint16_t address);
 
     inline uint8_t getFunction0to4(int address)
     {
@@ -219,6 +220,7 @@ signals:
     void locoSlotChanged(int Slot);
     void locoSlotRequested(int address);
     void locoFuncChanged(int address, int func);
+    void locoSpeedChanged(int address, int speed, int steps);
 
 private:
     friend class LocoDriveModel;
