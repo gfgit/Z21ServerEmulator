@@ -9,14 +9,10 @@
 #include "z21library/z21.h"
 #include "z21library/z21header.h"
 
-struct LocoNetBusHolder
-{
-    //This class is needed because LocoNetBus cannot be easily
-    //forward declared in header
-    LocoNetBusHolder() = default;
+#include "loconetbus.h"
 
-    LocoNetBus bus;
-};
+#include <QDebug>
+#include <iostream>
 
 
 LocoNetZ21Adapter::LocoNetZ21Adapter(Z21Server *server) :
