@@ -45,6 +45,10 @@ set(PROJECT_SOURCES
         server/loconet/loconetz21adapter.cpp
         server/loconet/loconetz21source.h
         server/loconet/loconetz21source.cpp
+        server/loconet/loconettcpbinaryserver.h
+        server/loconet/loconettcpbinaryserver.cpp
+        server/loconet/loconettcpsource.h
+        server/loconet/loconettcpsource.cpp
         server/loconet/loconetbus.h
 
         widgets/powerstatusled.h

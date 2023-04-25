@@ -4,6 +4,7 @@
 #ifdef WITH_LOCONET2
 
 #include "loconetz21source.h"
+#include "loconettcpbinaryserver.h"
 
 #include "server/z21server.h"
 #include "z21library/z21.h"
@@ -22,6 +23,8 @@ LocoNetZ21Adapter::LocoNetZ21Adapter(Z21Server *server) :
     m_busHolder = new LocoNetBusHolder;
     m_source = new LocoNetZ21Source(&m_busHolder->bus, this);
     m_dispatcher = new LocoNetDispatcher(&m_busHolder->bus);
+    m_tcpServer = new LocoNetTCPBinaryServer(m_busHolder, this);
+    m_tcpServer->startServer();
 
     //Register dispatcher callbacks
     m_dispatcher->onPowerChange(std::bind(&LocoNetZ21Adapter::setZ21PowerFromLocoNet,

@@ -8,6 +8,7 @@
 class Z21Server;
 class LocoNetZ21Source;
 struct LocoNetBusHolder;
+class LocoNetTCPBinaryServer;
 
 class LocoNetDispatcher;
 
@@ -37,6 +38,7 @@ private:
     LocoNetBusHolder *m_busHolder;
     LocoNetZ21Source *m_source;
     LocoNetDispatcher *m_dispatcher;
+    LocoNetTCPBinaryServer *m_tcpServer;
 };
 
 #endif // LOCONETZ21ADAPTER_H
