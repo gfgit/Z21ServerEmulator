@@ -64,17 +64,17 @@ struct LocoSlot
         return f1 >> 4; //F12 F11 F10 F9
     }
 
-    inline uint8_t getFunktion13to20() const
+    inline uint8_t getFunction13to20() const
     {
         return f2; //F20 - F13
     }
 
-    inline uint8_t getFunktion21to28() const
+    inline uint8_t getFunction21to28() const
     {
         return f3; //F28 - F21
     }
 
-    inline uint8_t getFunktion29to31() const
+    inline uint8_t getFunction29to31() const
     {
         return f0 >> 5; //F31 - F29
     }
@@ -125,6 +125,42 @@ public:
     bool setSpeed28(uint16_t address, uint8_t speed);
     bool setSpeed128(uint16_t address, uint8_t speed);
 
+    inline uint8_t getFunction0to4(int address)
+    {
+        uint8_t Slot = getSlotForAddress(address);
+        return loco_slots[Slot].getFunction0to4();
+    }
+
+    inline uint8_t getFunction5to8(int address)
+    {
+        uint8_t Slot = getSlotForAddress(address);
+        return loco_slots[Slot].getFunction5to8();
+    }
+
+    inline uint8_t getFunction9to12(int address)
+    {
+        uint8_t Slot = getSlotForAddress(address);
+        return loco_slots[Slot].getFunction9to12();
+    }
+
+    inline uint8_t getFunction13to20(int address)
+    {
+        uint8_t Slot = getSlotForAddress(address);
+        return loco_slots[Slot].getFunction13to20();
+    }
+
+    inline uint8_t getFunction21to28(int address)
+    {
+        uint8_t Slot = getSlotForAddress(address);
+        return loco_slots[Slot].getFunction21to28();
+    }
+
+    inline uint8_t getFunction29to31(int address)
+    {
+        uint8_t Slot = getSlotForAddress(address);
+        return loco_slots[Slot].getFunction29to31();
+    }
+
     void setFunctions0to4(uint16_t address, uint8_t func)
     {
         uint8_t Slot = getSlotForAddress(address);
@@ -167,9 +203,16 @@ public:
         emit locoSlotChanged(Slot);
     }
 
+    bool getLocoDir(uint16_t address)
+    {
+        uint8_t Slot = getSlotForAddress(address);
+        return loco_slots[Slot].getDirection();
+    }
+
 signals:
     void locoSlotChanged(int Slot);
     void locoSlotRequested(int address);
+    void locoFuncChanged(int address, int func);
 
 private:
     friend class LocoDriveModel;

@@ -206,6 +206,7 @@ void LocoManager::setLocoFuncHelper(uint16_t address, uint8_t type, uint8_t fkt)
     }
 
     emit locoSlotChanged(Slot);
+    emit locoFuncChanged(address, fkt);
 }
 
 void LocoManager::updateZ21LocoState(uint16_t address)
@@ -234,17 +235,17 @@ bool LocoSlot::getFunction(int func) const
     }
     else if ((func >= 13) && (func <= 20))
     {
-        uint8_t val = getFunktion13to20();
+        uint8_t val = getFunction13to20();
         return bitRead(val, func - 13);
     }
     else if ((func >= 21) && (func <= 28))
     {
-        uint8_t val = getFunktion21to28();
+        uint8_t val = getFunction21to28();
         return bitRead(val, func - 21);
     }
     else if ((func >= 29) && (func <= 36))
     {
-        uint8_t val = getFunktion29to31();
+        uint8_t val = getFunction29to31();
         return bitRead(val, func - 29);
     }
 
