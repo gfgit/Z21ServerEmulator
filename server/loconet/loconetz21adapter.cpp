@@ -9,6 +9,7 @@
 
 #include "server/z21server.h"
 #include "server/loco/locomanager.h"
+#include "server/accessories/accessorymanager.h"
 
 #include "z21library/z21.h"
 #include "z21library/z21header.h"
@@ -73,10 +74,24 @@ LocoNetZ21Adapter::LocoNetZ21Adapter(Z21Server *server) :
     m_dispatcher->onPacket(OPC_IDLE, powerStateHandler);
 
     m_dispatcher->onPacket(CALLBACK_FOR_ALL_OPCODES, &log_all_traffic);
+    m_dispatcher->onSwitchRequest([this](uint16_t address, bool on, bool dir)
+                                 {
+                                     m_server->getAccessoryMgr()->setAccessoryState(address, dir);
+                                 });
+    m_dispatcher->onSwitchState([this](uint16_t address, bool on, bool dir)
+                                  {
+                                      m_server->getAccessoryMgr()->setAccessoryState(address, dir);
+                                  });
 
     //Register Z21 callbacks
     connect(m_server, &Z21Server::powerStateChanged,
             this, &LocoNetZ21Adapter::setLocoNetPowerFromZ21);
+    connect(m_server->getAccessoryMgr(), &AccessoryManager::accessoryStateChanged,
+            this, [this](int idx, int port, bool val)
+            {
+                int address = idx * 8 + port;
+                requestSwitch(&m_busHolder->bus, address, true, val);
+            });
 }
 
 LocoNetZ21Adapter::~LocoNetZ21Adapter()
