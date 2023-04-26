@@ -18,9 +18,9 @@ void AccessoryManager::setAccessoryState(int index, int port, bool val)
     if(index < 0 || index >= Z21::ACCESSORY_COUNT / 8)
         return;
 
-    //bool oldVal = accessories[index].test(port);
-    //if(oldVal == val)
-    //    return;
+    bool oldVal = accessories[index].test(port);
+    if(oldVal == val)
+        return;
 
     accessories[index].set(port, val);
     emit accessoryStateChanged(index, port, val);
