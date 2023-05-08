@@ -13,7 +13,10 @@ LocoManager::LocoManager(Z21Server *server) :
     QObject{server},
     m_server(server)
 {
-
+    for(int i = 0; i < Z21::MAX_LOCO_SLOTS; i++)
+    {
+        initSlot(i, 0);
+    }
 }
 
 void LocoManager::setLocoFunction(uint16_t address, int func, bool val)
@@ -30,39 +33,20 @@ bool LocoManager::getLocoFunction(uint16_t address, int func)
 
 bool LocoManager::setSpeed14(uint16_t address, uint8_t speed)
 {
-    if (address == 0)
-    {
-        // Invalid address
-        return false;
-    }
-
-    uint8_t Slot = getSlotForAddress(address);
-    loco_slots[Slot].speed = speed;
-    loco_slots[Slot].setSpeedSteps(Z21::DCCSpeedSteps::_14);
-    emit locoSlotChanged(Slot);
-    emit locoSpeedChanged(address, speed, 14);
-
-    return true;
+    return setLocoSpeed(address, speed, 14, speed & (1 << 7));
 }
 
 bool LocoManager::setSpeed28(uint16_t address, uint8_t speed)
 {
-    if (address == 0)
-    {
-        // Invalid address
-        return false;
-    }
-
-    uint8_t Slot = getSlotForAddress(address);
-    loco_slots[Slot].speed = speed;
-    loco_slots[Slot].setSpeedSteps(Z21::DCCSpeedSteps::_28);
-    emit locoSlotChanged(Slot);
-    emit locoSpeedChanged(address, speed, 28);
-
-    return true;
+    return setLocoSpeed(address, speed, 28, speed & (1 << 7));
 }
 
 bool LocoManager::setSpeed128(uint16_t address, uint8_t speed)
+{
+    return setLocoSpeed(address, speed, 128, speed & (1 << 7));
+}
+
+bool LocoManager::setLocoSpeed(uint16_t address, uint8_t speed, uint8_t steps, bool dir)
 {
     if (address == 0)
     {
@@ -72,9 +56,16 @@ bool LocoManager::setSpeed128(uint16_t address, uint8_t speed)
 
     uint8_t Slot = getSlotForAddress(address);
     loco_slots[Slot].speed = speed;
-    loco_slots[Slot].setSpeedSteps(Z21::DCCSpeedSteps::_128);
+    loco_slots[Slot].setDirection(dir);
+    loco_slots[Slot].setSpeedSteps(Z21::speedStepsToEnum(steps));
+
+    updateZ21LocoState(address);
+
     emit locoSlotChanged(Slot);
-    emit locoSpeedChanged(address, speed, 128);
+    emit locoSpeedChanged(address,
+                          loco_slots[Slot].getSpeed(),
+                          Z21::speedStepsToInt(loco_slots[Slot].getSpeedSteps()),
+                          loco_slots[Slot].getDirection());
 
     return true;
 }
@@ -221,6 +212,11 @@ void LocoManager::setLocoFuncHelper(uint16_t address, uint8_t type, uint8_t fkt)
 void LocoManager::updateZ21LocoState(uint16_t address)
 {
     m_server->m_z21->setLocoStateExt(address);
+}
+
+void LocoSlot::setDirection(bool dir)
+{
+    bitWrite(speed, 7, dir);
 }
 
 bool LocoSlot::getFunction(int func) const

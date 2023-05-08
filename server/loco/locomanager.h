@@ -42,6 +42,8 @@ struct LocoSlot
         return (speed >> 7) & 0x01;
     }
 
+    void setDirection(bool dir);
+
     inline uint8_t getSpeed() const
     {
         return speed & 0x7F;
@@ -216,11 +218,31 @@ public:
         return loco_slots[Slot].getDirection();
     }
 
+    void setLocoDir(uint16_t address, bool dir)
+    {
+        uint8_t Slot = getSlotForAddress(address);
+        if(loco_slots[Slot].getDirection() == dir)
+            return;
+
+        loco_slots[Slot].setDirection(dir);
+        updateZ21LocoState(address);
+        int speedSteps = 128;
+        if(loco_slots[Slot].getSpeedSteps() == Z21::DCCSpeedSteps::_28)
+            speedSteps = 28;
+        else if(loco_slots[Slot].getSpeedSteps() == Z21::DCCSpeedSteps::_14)
+            speedSteps = 14;
+
+        emit locoSlotChanged(Slot);
+        emit locoSpeedChanged(address, loco_slots[Slot].getSpeed(), speedSteps, loco_slots[Slot].getDirection());
+    }
+
+    bool setLocoSpeed(uint16_t address, uint8_t speed, uint8_t steps, bool dir);
+
 signals:
     void locoSlotChanged(int Slot);
     void locoSlotRequested(int address);
     void locoFuncChanged(int address, int func);
-    void locoSpeedChanged(int address, int speed, int steps);
+    void locoSpeedChanged(int address, int speed, int steps, bool dir);
 
 private:
     friend class LocoDriveModel;
