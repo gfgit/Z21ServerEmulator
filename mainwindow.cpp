@@ -9,6 +9,8 @@
 #include "widgets/powerstatusled.h"
 #include <QComboBox>
 
+#include "widgets/throttlewidget.h"
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -47,6 +49,8 @@ MainWindow::MainWindow(QWidget *parent)
     //Loco Tab
     locoModel = new LocoDriveModel(this);
     ui->locoTableView->setModel(locoModel);
+
+    connect(ui->actionNew_Throttle, &QAction::triggered, this, &MainWindow::onNewThrottle);
 }
 
 MainWindow::~MainWindow()
@@ -89,4 +93,12 @@ void MainWindow::onPowerComboIndexChanged()
         return;
 
     m_server->setPower(state);
+}
+
+void MainWindow::onNewThrottle()
+{
+    ThrottleWidget *throttle = new ThrottleWidget(m_server->getLocoMgr(), this);
+    throttle->setWindowFlag(Qt::Window);
+    throttle->setAttribute(Qt::WA_DeleteOnClose);
+    throttle->show();
 }

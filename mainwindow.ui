@@ -63,8 +63,20 @@
      <height>25</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuDrive">
+    <property name="title">
+     <string>Drive</string>
+    </property>
+    <addaction name="actionNew_Throttle"/>
+   </widget>
+   <addaction name="menuDrive"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionNew_Throttle">
+   <property name="text">
+    <string>New Throttle</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

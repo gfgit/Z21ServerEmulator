@@ -27,6 +27,7 @@ public:
 private slots:
     void onPowerStateChanged(int state);
     void onPowerComboIndexChanged();
+    void onNewThrottle();
 
 private:
     Ui::MainWindow *ui;

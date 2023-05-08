@@ -55,6 +55,8 @@ set(PROJECT_SOURCES
 
         widgets/powerstatusled.h
         widgets/powerstatusled.cpp
+        widgets/throttlewidget.h
+        widgets/throttlewidget.cpp
 
         arduino_compat/WProgram.h
         arduino_compat/EEPROM.h
