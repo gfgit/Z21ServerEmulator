@@ -2,22 +2,6 @@
 
 #include "server/loco/locomanager.h"
 
-inline int speedStepsToInt(Z21::DCCSpeedSteps steps)
-{
-    switch (steps)
-    {
-    case Z21::DCCSpeedSteps::_14:
-        return 14;
-    case Z21::DCCSpeedSteps::_28:
-        return 28;
-    case Z21::DCCSpeedSteps::_128:
-        return 128;
-    default:
-        break;
-    }
-    return 0;
-}
-
 LocoDriveModel::LocoDriveModel(QObject *parent) :
     QAbstractTableModel(parent)
 {
@@ -83,7 +67,7 @@ QVariant LocoDriveModel::data(const QModelIndex &idx, int role) const
         case Address:
             return locoSlot.address();
         case DCCSteps:
-            return speedStepsToInt(locoSlot.getSpeedSteps());
+            return Z21::speedStepsToInt(locoSlot.getSpeedSteps());
         case Direction:
             if(locoSlot.getDirection())
                 return tr("FWD");

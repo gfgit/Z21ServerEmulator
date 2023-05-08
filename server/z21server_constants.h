@@ -33,6 +33,37 @@ enum class DCCSpeedSteps
     _128 = 0x03
 };
 
+
+inline int speedStepsToInt(Z21::DCCSpeedSteps steps)
+{
+    switch (steps)
+    {
+    case Z21::DCCSpeedSteps::_14:
+        return 14;
+    case Z21::DCCSpeedSteps::_28:
+        return 28;
+    case Z21::DCCSpeedSteps::_128:
+        return 128;
+    default:
+        break;
+    }
+    return 0;
+}
+
+inline Z21::DCCSpeedSteps speedStepsToEnum(int steps)
+{
+    switch (steps)
+    {
+    case 14:
+        return Z21::DCCSpeedSteps::_14;
+    case 28:
+        return Z21::DCCSpeedSteps::_28;
+    default:
+    case 128:
+        return Z21::DCCSpeedSteps::_128;
+    }
+}
+
 } // namespace Z21
 
 #endif // Z21SERVER_CONSTANTS_H
