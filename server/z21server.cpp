@@ -1,6 +1,7 @@
 #include "z21server.h"
 
 #include <QUdpSocket>
+#include <QtEndian>
 
 #include "z21library/z21.h"
 
@@ -293,6 +294,9 @@ bool Z21Server::startServer(quint16 port)
     if(!m_udpServer->bind(port))
         return false;
 
+    m_udpServer->setSocketOption(QUdpSocket::ReceiveBufferSizeSocketOption, 2 * 65536);
+    qDebug() << "UDP RECV BUF:" << m_udpServer->socketOption(QUdpSocket::ReceiveBufferSizeSocketOption);
+
     setPower(Z21::PowerState::Normal);
     return true;
 }
@@ -316,18 +320,42 @@ Z21::PowerState Z21Server::getPower() const
 
 void Z21Server::readPendingDatagram()
 {
+    constexpr int MAX_BUF_SIZE = 4096;
+
     while(m_udpServer->hasPendingDatagrams())
     {
+        //Allocate buffer
+        qint64 sz = m_udpServer->pendingDatagramSize();
+        if(sz > MAX_BUF_SIZE)
+            sz = MAX_BUF_SIZE;
+
+        std::unique_ptr<uint8_t[]> buf(new uint8_t[sz]);
+        uint8_t *ptr = buf.get();
+
         //Receive datagram
-        char buffer[Z21::Z21_UDP_TX_MAX_SIZE] = {};
         Client client;
-        m_udpServer->readDatagram(buffer, Z21::Z21_UDP_TX_MAX_SIZE, &client.remoteAddr, &client.remotePort);
+        m_udpServer->readDatagram(reinterpret_cast<char *>(ptr), sz, &client.remoteAddr, &client.remotePort);
 
         //Register client
         int clientIdx = addClientAndGetIndex(client);
 
-        //Handle requests
-        m_z21->receive(clientIdx, reinterpret_cast<uint8_t *>(buffer));
+        //NOTE: a single datagram can contain multimple independent Z21 message
+        while(sz > 2)
+        {
+            //Check message is fully read
+            uint16_t msgSize = *reinterpret_cast<uint16_t *>(ptr);
+            msgSize = qFromLittleEndian(msgSize);
+
+            if(msgSize > sz)
+                break;
+
+            //Handle message
+            m_z21->receive(clientIdx, ptr);
+
+            //Go to next message
+            ptr += msgSize;
+            sz -= msgSize;
+        }
     }
 }
 
