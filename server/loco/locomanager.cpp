@@ -76,6 +76,12 @@ int LocoManager::getLocoSpeed(uint16_t address)
     return loco_slots[Slot].getSpeed();
 }
 
+Z21::DCCSpeedSteps LocoManager::getLocoSpeedSteps(uint16_t address)
+{
+    uint8_t Slot = getSlotForAddress(address);
+    return loco_slots[Slot].getSpeedSteps();
+}
+
 void LocoManager::initSlot(uint8_t Slot, uint16_t address)
 {
     const Z21::DCCSpeedSteps DCCdefaultSteps = Z21::DCCSpeedSteps::_128;
@@ -89,19 +95,22 @@ void LocoManager::initSlot(uint8_t Slot, uint16_t address)
     emit locoSlotChanged(Slot);
 }
 
-uint8_t LocoManager::getSlotForAddress(uint16_t address)
+uint8_t LocoManager::getSlotForAddress(uint16_t address, bool add)
 {
     uint8_t Slot;
     for (Slot = 0; Slot < Z21::MAX_LOCO_SLOTS; Slot++)
     {
         if ((loco_slots[Slot].adr & 0x3FFF) == address)
             return Slot; //Found locomotive
-        if ((loco_slots[Slot].adr & 0x3FFF) == 0) {
+        if (add && (loco_slots[Slot].adr & 0x3FFF) == 0) {
             //Empty? New free slot
             initSlot(Slot, address); //Register
             return Slot;
         }
     }
+
+    if(!add)
+        return UINT8_MAX;
 
     //no slot available!
     //start at the beginning with the overwriting

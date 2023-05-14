@@ -127,6 +127,7 @@ public:
     bool setSpeed28(uint16_t address, uint8_t speed);
     bool setSpeed128(uint16_t address, uint8_t speed);
     int getLocoSpeed(uint16_t address);
+    Z21::DCCSpeedSteps getLocoSpeedSteps(uint16_t address);
 
     inline uint8_t getFunction0to4(int address)
     {
@@ -238,6 +239,11 @@ public:
 
     bool setLocoSpeed(uint16_t address, uint8_t speed, uint8_t steps, bool dir);
 
+    bool isLocoPresent(uint16_t address)
+    {
+        return getSlotForAddress(address, false) == UINT8_MAX;
+    }
+
 signals:
     void locoSlotChanged(int Slot);
     void locoSlotRequested(int address);
@@ -252,7 +258,7 @@ private:
     friend void notifyz21LocoFkt(uint16_t Adr, uint8_t type, uint8_t fkt);
 
     void initSlot(uint8_t Slot, uint16_t address);
-    uint8_t getSlotForAddress(uint16_t address);
+    uint8_t getSlotForAddress(uint16_t address, bool add = true);
     void getLocoData(uint8_t Slot, uint8_t loco_data[6]);
     void getLocoDataForAddress(uint16_t address, uint8_t loco_data[6]);
     void setLocoFuncHelper(uint16_t address, uint8_t type, uint8_t fkt);
