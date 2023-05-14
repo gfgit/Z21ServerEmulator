@@ -2,11 +2,13 @@
 #define THROTTLEWIDGET_H
 
 #include <QWidget>
+#include "server/z21server_constants.h"
 
 class QLineEdit;
 class QSlider;
 class QSpinBox;
 class QPushButton;
+class QComboBox;
 
 class LocoManager;
 
@@ -14,6 +16,13 @@ enum class Direction
 {
     Forward = 0,
     Reverse
+};
+
+enum class LocoStatus
+{
+    Stopped = 0,
+    EmergencyStopped,
+    Running
 };
 
 class ThrottleWidget : public QWidget
@@ -26,10 +35,19 @@ public:
 
 public slots:
     void emergencyStop();
-    void handleSpeedChanged(int address, int speed, int speedSteps, bool dir);
+    void normalStop();
+    void setSpeed(int speed, bool send = true);
+    void handleSpeedChanged(int address, int encodedSpeed, int speedSteps, bool dir);
+    void loadLoco(int address);
 
 private slots:
     void sendSpeedValue(int speed);
+
+private:
+    void setSpeedSteps(Z21::DCCSpeedSteps speedSteps);
+    void setLocoStatus(LocoStatus status);
+    static int encodeSpeed(const int speed, Z21::DCCSpeedSteps speedSteps, LocoStatus status);
+    static int decodeSpeed(int speed, Z21::DCCSpeedSteps speedSteps, LocoStatus& outStatus);
 
 private:
     LocoManager *m_locoMgr;
@@ -39,12 +57,18 @@ private:
 
     QSlider *throttleSlider;
     QSpinBox *throttleSpinBox;
+    QComboBox *stepsCombo;
 
     QPushButton *forwardBut;
     QPushButton *reverseBut;
     QPushButton *stopBut;
+    QPushButton *emergencyStopBut;
 
-    Direction m_direction;
+    int m_address = 0;
+    int m_speed = 0;
+    Direction m_direction = Direction::Forward;
+    Z21::DCCSpeedSteps m_speedSteps = Z21::DCCSpeedSteps::_128;
+    LocoStatus m_status = LocoStatus::Stopped;
 };
 
 #endif // THROTTLEWIDGET_H
