@@ -36,16 +36,17 @@ public:
 public slots:
     void emergencyStop();
     void normalStop();
-    void setSpeed(int speed, bool send = true);
     void handleSpeedChanged(int address, int encodedSpeed, int speedSteps, bool dir);
     void loadLoco(int address);
 
 private slots:
-    void sendSpeedValue(int speed);
+    void sendToZ21();
+    void setSpeed_slot(int speed);
 
 private:
     void setSpeedSteps(Z21::DCCSpeedSteps speedSteps);
-    void setLocoStatus(LocoStatus status);
+    void setLocoStatus(LocoStatus status, bool send = true);
+    void setSpeed(int speed, bool send = true);
     static int encodeSpeed(const int speed, Z21::DCCSpeedSteps speedSteps, LocoStatus status);
     static int decodeSpeed(int speed, Z21::DCCSpeedSteps speedSteps, LocoStatus& outStatus);
 

@@ -9,6 +9,14 @@
 #include <QPushButton>
 #include <QComboBox>
 
+inline int getHighestStep(Z21::DCCSpeedSteps steps)
+{
+    int highestStep = Z21::speedStepsToInt(steps);
+    if(steps == Z21::DCCSpeedSteps::_128)
+        highestStep -= 2; //Remove "1" step which is Emergency stop, and "0" Stop which is part of value
+    return highestStep;
+}
+
 ThrottleWidget::ThrottleWidget(LocoManager *locoMgr, QWidget *parent) :
     QWidget{parent},
     m_locoMgr(locoMgr)
@@ -56,12 +64,10 @@ ThrottleWidget::ThrottleWidget(LocoManager *locoMgr, QWidget *parent) :
 
     lay->addRow(butLay);
 
-    connect(throttleSlider, &QSlider::sliderMoved,
-            throttleSpinBox, &QSpinBox::setValue);
+    connect(throttleSlider, &QSlider::valueChanged,
+            this, &ThrottleWidget::setSpeed_slot);
     connect(throttleSpinBox, qOverload<int>(&QSpinBox::valueChanged),
-            throttleSlider, &QSlider::setValue);
-    connect(throttleSpinBox, qOverload<int>(&QSpinBox::valueChanged),
-            this, &ThrottleWidget::sendSpeedValue);
+            this, &ThrottleWidget::setSpeed_slot);
 
     connect(forwardBut, &QPushButton::clicked, this, [this]() { setDirection(Direction::Forward); });
     connect(reverseBut, &QPushButton::clicked, this, [this]() { setDirection(Direction::Reverse); });
@@ -70,6 +76,13 @@ ThrottleWidget::ThrottleWidget(LocoManager *locoMgr, QWidget *parent) :
 
     connect(m_locoMgr, &LocoManager::locoSpeedChanged, this, &ThrottleWidget::handleSpeedChanged);
     connect(addressSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ThrottleWidget::loadLoco);
+    connect(stepsCombo, qOverload<int>(&QComboBox::activated), this,
+            [this](int idx)
+            {
+                Z21::DCCSpeedSteps steps = Z21::DCCSpeedSteps(stepsCombo->itemData(idx).toInt());
+                setSpeedSteps(steps);
+                sendToZ21();
+            });
 
     addressSpinBox->setRange(0, 9999);
     handleSpeedChanged(0, 0, 128, true);
@@ -96,7 +109,7 @@ void ThrottleWidget::setDirection(Direction value)
     forwardBut->setPalette(m_direction == Direction::Forward ? redPal : pal);
     reverseBut->setPalette(m_direction == Direction::Reverse ? redPal : pal);
 
-    if(addressSpinBox->value())
+    if(m_address)
         m_locoMgr->setLocoDir(addressSpinBox->value(), m_direction == Direction::Forward);
 }
 
@@ -111,26 +124,37 @@ void ThrottleWidget::emergencyStop()
     {
         //Go in emergency stop
         setLocoStatus(LocoStatus::EmergencyStopped);
-        sendSpeedValue(0);
     }
 }
 
 void ThrottleWidget::normalStop()
 {
     setLocoStatus(LocoStatus::Stopped);
-    sendSpeedValue(0);
 }
 
 void ThrottleWidget::setSpeed(int speed, bool send)
 {
-    if(speed == m_speed || speed > throttleSpinBox->maximum())
+    if(speed == m_speed)
         return;
 
+    const int maxStep = getHighestStep(m_speedSteps);
+    if(speed >= maxStep)
+        speed = maxStep;
     m_speed = speed;
+
+    if(m_status != LocoStatus::EmergencyStopped)
+    {
+        setLocoStatus(m_speed > 0 ? LocoStatus::Running : LocoStatus::Stopped, false);
+    }
+
+    QSignalBlocker blk1(throttleSpinBox);
     throttleSpinBox->setValue(m_speed);
 
+    QSignalBlocker blk2(throttleSlider);
+    throttleSlider->setValue(m_speed);
+
     if(send)
-        sendSpeedValue(m_speed);
+        sendToZ21();
 }
 
 void ThrottleWidget::handleSpeedChanged(int address, int encodedSpeed, int speedSteps, bool dir)
@@ -143,18 +167,15 @@ void ThrottleWidget::handleSpeedChanged(int address, int encodedSpeed, int speed
 
     LocoStatus status = LocoStatus::Stopped;
     const int speed = decodeSpeed(encodedSpeed, m_speedSteps, status);
-    setLocoStatus(status);
-
-    QSignalBlocker blk(throttleSpinBox);
-    throttleSpinBox->setValue(speed);
-    throttleSlider->setValue(speed);
+    setLocoStatus(status, false);
+    setSpeed(speed, false);
 }
 
 void ThrottleWidget::loadLoco(int address)
 {
     m_address = 0; //Disable sending values
 
-    setLocoStatus(LocoStatus::EmergencyStopped);
+    setLocoStatus(LocoStatus::EmergencyStopped, false);
     setDirection(Direction::Forward);
 
     if(address != 0 && m_locoMgr->isLocoPresent(address))
@@ -166,7 +187,7 @@ void ThrottleWidget::loadLoco(int address)
 
         LocoStatus status = LocoStatus::Stopped;
         const int speed = decodeSpeed(m_locoMgr->getLocoSpeed(address), m_speedSteps, status);
-        setLocoStatus(status);
+        setLocoStatus(status, false);
         setSpeed(speed, false);
     }
 
@@ -176,19 +197,25 @@ void ThrottleWidget::loadLoco(int address)
     addressSpinBox->setValue(address);
 }
 
-void ThrottleWidget::sendSpeedValue(int speed)
+void ThrottleWidget::sendToZ21()
 {
     if(!m_address)
         return;
 
-    int encodedSpeed = encodeSpeed(speed, m_speedSteps, m_status);
+    int encodedSpeed = encodeSpeed(m_speed, m_speedSteps, m_status);
 
     m_locoMgr->setLocoSpeed(m_address, encodedSpeed,
                             Z21::speedStepsToInt(m_speedSteps), m_direction == Direction::Forward);
 }
 
+void ThrottleWidget::setSpeed_slot(int speed)
+{
+    setSpeed(speed, true);
+}
+
 void ThrottleWidget::setSpeedSteps(Z21::DCCSpeedSteps speedSteps)
 {
+    const int oldMaxStep = getHighestStep(m_speedSteps);
     m_speedSteps = speedSteps;
 
     //Update speed steps combo
@@ -196,17 +223,21 @@ void ThrottleWidget::setSpeedSteps(Z21::DCCSpeedSteps speedSteps)
     stepsCombo->setCurrentIndex(idx);
 
     //Update slider and spin box maximum
-    int highestStep = Z21::speedStepsToInt(m_speedSteps);
-    if(m_speedSteps == Z21::DCCSpeedSteps::_128)
-        highestStep -= 2; //Remove "1" step which is Emergency stop, and "0" Stop which is part of value
-
+    const int maxStep = getHighestStep(m_speedSteps);
     QSignalBlocker blk(throttleSpinBox);
     QSignalBlocker blk1(throttleSlider);
-    throttleSpinBox->setMaximum(highestStep);
-    throttleSlider->setMaximum(highestStep);
+    throttleSpinBox->setMaximum(maxStep);
+    throttleSlider->setMaximum(maxStep);
+
+    if(oldMaxStep != maxStep)
+    {
+        //Recalc speed
+        int newSpeed = int(double(m_speed) / oldMaxStep * maxStep);
+        setSpeed(newSpeed, false);
+    }
 }
 
-void ThrottleWidget::setLocoStatus(LocoStatus status)
+void ThrottleWidget::setLocoStatus(LocoStatus status, bool send)
 {
     m_status = status;
     if(m_status == LocoStatus::EmergencyStopped)
@@ -214,12 +245,18 @@ void ThrottleWidget::setLocoStatus(LocoStatus status)
         throttleSpinBox->setPrefix(QLatin1String("ESTOP "));
         throttleSpinBox->setEnabled(false);
         throttleSlider->setEnabled(false);
+        setSpeed(0, false);
+        if(send)
+            sendToZ21();
     }
-    else
+    else if(m_status == LocoStatus::Stopped)
     {
         throttleSpinBox->setPrefix(QString());
         throttleSpinBox->setEnabled(true);
         throttleSlider->setEnabled(true);
+        setSpeed(0, false);
+        if(send)
+            sendToZ21();
     }
 }
 
