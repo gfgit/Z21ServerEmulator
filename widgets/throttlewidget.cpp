@@ -269,7 +269,7 @@ int ThrottleWidget::decodeSpeed(const int val, Z21::DCCSpeedSteps speedSteps, Lo
             speed -= 1; //Skip E-Stop step
         break;
     case Z21::DCCSpeedSteps::_28:
-        speed = ((val >> 1) & 0x0F) | ((val & 0x01) << 4);
+        speed = ((val & 0x0F) << 1) | ((val & 0x10) >> 4);
         if(speed >= 3)
             speed -= 3 ;//Skip 2 values of E-Stop and another value for Stop
         break;
