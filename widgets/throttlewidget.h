@@ -9,6 +9,7 @@ class QSlider;
 class QSpinBox;
 class QPushButton;
 class QComboBox;
+class QCheckBox;
 
 class LocoManager;
 
@@ -38,6 +39,7 @@ public slots:
     void normalStop();
     void handleSpeedChanged(int address, int encodedSpeed, int speedSteps, bool dir);
     void loadLoco(int address);
+    void setSyncSpeed(bool val);
 
 private slots:
     void sendToZ21();
@@ -55,6 +57,7 @@ private:
 
     QLineEdit *nameEdit;
     QSpinBox *addressSpinBox;
+    QCheckBox *syncSpeedCheck;
 
     QSlider *throttleSlider;
     QSpinBox *throttleSpinBox;
@@ -70,6 +73,7 @@ private:
     Direction m_direction = Direction::Forward;
     Z21::DCCSpeedSteps m_speedSteps = Z21::DCCSpeedSteps::_128;
     LocoStatus m_status = LocoStatus::Stopped;
+    bool m_syncSpeed = true;
 };
 
 #endif // THROTTLEWIDGET_H

@@ -8,6 +8,7 @@
 #include <QSlider>
 #include <QPushButton>
 #include <QComboBox>
+#include <QCheckBox>
 
 inline int getHighestStep(Z21::DCCSpeedSteps steps)
 {
@@ -28,6 +29,12 @@ ThrottleWidget::ThrottleWidget(LocoManager *locoMgr, QWidget *parent) :
 
     addressSpinBox = new QSpinBox;
     lay->addRow(tr("Address"), addressSpinBox);
+
+    syncSpeedCheck = new QCheckBox(tr("Sync speed"));
+    syncSpeedCheck->setToolTip(tr("Update slider when speed is changed externally.\n"
+                                  "Turn off to simulate manual throttle like MultiMaus\n"
+                                  "which keep throttle position on external change."));
+    lay->addRow(syncSpeedCheck);
 
     throttleSpinBox = new QSpinBox;
     lay->addRow(tr("Throttle"), throttleSpinBox);
@@ -76,6 +83,7 @@ ThrottleWidget::ThrottleWidget(LocoManager *locoMgr, QWidget *parent) :
 
     connect(m_locoMgr, &LocoManager::locoSpeedChanged, this, &ThrottleWidget::handleSpeedChanged);
     connect(addressSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ThrottleWidget::loadLoco);
+    connect(syncSpeedCheck, &QCheckBox::toggled, this, &ThrottleWidget::setSyncSpeed);
     connect(stepsCombo, qOverload<int>(&QComboBox::activated), this,
             [this](int idx)
             {
@@ -85,6 +93,8 @@ ThrottleWidget::ThrottleWidget(LocoManager *locoMgr, QWidget *parent) :
             });
 
     addressSpinBox->setRange(0, 9999);
+
+    setSyncSpeed(true);
     handleSpeedChanged(0, 0, 128, true);
 
     QFont boldText;
@@ -168,7 +178,9 @@ void ThrottleWidget::handleSpeedChanged(int address, int encodedSpeed, int speed
     LocoStatus status = LocoStatus::Stopped;
     const int speed = decodeSpeed(encodedSpeed, m_speedSteps, status);
     setLocoStatus(status, false);
-    setSpeed(speed, false);
+
+    if(m_syncSpeed)
+        setSpeed(speed, false);
 }
 
 void ThrottleWidget::loadLoco(int address)
@@ -195,6 +207,12 @@ void ThrottleWidget::loadLoco(int address)
     m_address = address;
     QSignalBlocker blk(addressSpinBox);
     addressSpinBox->setValue(address);
+}
+
+void ThrottleWidget::setSyncSpeed(bool val)
+{
+    m_syncSpeed = val;
+    syncSpeedCheck->setChecked(val);
 }
 
 void ThrottleWidget::sendToZ21()
@@ -245,7 +263,10 @@ void ThrottleWidget::setLocoStatus(LocoStatus status, bool send)
         throttleSpinBox->setPrefix(QLatin1String("ESTOP "));
         throttleSpinBox->setEnabled(false);
         throttleSlider->setEnabled(false);
-        setSpeed(0, false);
+
+        if(m_syncSpeed) //Never reset speed if sync is disabled
+            setSpeed(0, false);
+
         if(send)
             sendToZ21();
     }
@@ -254,7 +275,10 @@ void ThrottleWidget::setLocoStatus(LocoStatus status, bool send)
         throttleSpinBox->setPrefix(QString());
         throttleSpinBox->setEnabled(true);
         throttleSlider->setEnabled(true);
-        setSpeed(0, false);
+
+        if(m_syncSpeed || send) //Reset also if sync disabled because it's handy
+            setSpeed(0, false);
+
         if(send)
             sendToZ21();
     }
