@@ -11,6 +11,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(ENABLE_LOCONET_STACK, ON CACHE BOOL "Enable LocoNet TCP server emulation")
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network)
 
@@ -94,7 +96,7 @@ endif()
 target_include_directories(Z21ServerEmulator PRIVATE z21library arduino_compat)
 
 # LocoNet support
-if(EXISTS ${LOCONET2_DIR})
+if(EXISTS ${LOCONET2_DIR} AND ENABLE_LOCONET_STACK)
     target_include_directories(Z21ServerEmulator PRIVATE ${LOCONET2_DIR})
     target_compile_definitions(Z21ServerEmulator PRIVATE WITH_LOCONET2=1 DEBUG_LN2_OUTPUT=1)
     target_sources(Z21ServerEmulator PRIVATE
