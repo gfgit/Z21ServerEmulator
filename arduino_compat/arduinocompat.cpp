@@ -41,7 +41,7 @@ byte ArduinoCompatEEPROM::read(int address)
     }
 
     byte value = storage[address];
-    std::cerr << "EEPROM READ addr: " << address << " val: " << int(value) << std::endl << std::flush;
+    //std::cerr << "EEPROM READ addr: " << address << " val: " << int(value) << std::endl << std::flush;
     return value;
 }
 
@@ -53,7 +53,7 @@ void ArduinoCompatEEPROM::write(int address, byte value)
         return;
     }
 
-    std::cerr << "EEPROM WRITE addr: " << address << " val: " << int(value) << std::endl << std::flush;
+    //std::cerr << "EEPROM WRITE addr: " << address << " val: " << int(value) << std::endl << std::flush;
     storage[address] = value;
 }
 
