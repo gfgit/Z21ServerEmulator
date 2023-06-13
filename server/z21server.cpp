@@ -430,7 +430,9 @@ LocoManager *Z21Server::getLocoMgr() const
     return m_locoMgr;
 }
 
+#ifdef WITH_LOCONET2
 LocoNetZ21Adapter *Z21Server::getLocoNetAdapter() const
 {
     return m_locoNetAdapter;
 }
+#endif
