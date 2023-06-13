@@ -14,6 +14,8 @@
 #include "server/loconet/loconetslotserver.h"
 #endif
 
+#include <thread>
+
 #include <iostream> //console debugging
 
 namespace Z21 {
@@ -348,6 +350,9 @@ void Z21Server::readPendingDatagram()
 
             if(msgSize > sz)
                 break;
+
+            //Simulate network slowdown
+            std::this_thread::sleep_for(std::chrono::milliseconds(250));
 
             //Handle message
             m_z21->receive(clientIdx, ptr);
