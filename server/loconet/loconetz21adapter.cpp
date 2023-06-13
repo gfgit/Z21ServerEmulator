@@ -92,6 +92,9 @@ LocoNetZ21Adapter::LocoNetZ21Adapter(Z21Server *server) :
                 int address = idx * 8 + port;
                 requestSwitch(&m_busHolder->bus, address, true, val);
             });
+
+    std::cerr.flush();
+    std::cout.flush();
 }
 
 LocoNetZ21Adapter::~LocoNetZ21Adapter()
