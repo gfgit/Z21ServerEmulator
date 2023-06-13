@@ -123,9 +123,9 @@ public:
     void setLocoFunction(uint16_t address, int func, bool val);
     bool getLocoFunction(uint16_t address, int func);
 
-    bool setSpeed14(uint16_t address, uint8_t speed);
-    bool setSpeed28(uint16_t address, uint8_t speed);
-    bool setSpeed128(uint16_t address, uint8_t speed);
+    bool setSpeed14(uint16_t address, uint8_t speed, bool sendToZ21 = true);
+    bool setSpeed28(uint16_t address, uint8_t speed, bool sendToZ21 = true);
+    bool setSpeed128(uint16_t address, uint8_t speed, bool sendToZ21 = true);
     int getLocoSpeed(uint16_t address);
     Z21::DCCSpeedSteps getLocoSpeedSteps(uint16_t address);
 
@@ -237,7 +237,7 @@ public:
         emit locoSpeedChanged(address, loco_slots[Slot].getSpeed(), speedSteps, loco_slots[Slot].getDirection());
     }
 
-    bool setLocoSpeed(uint16_t address, uint8_t speed, uint8_t steps, bool dir);
+    bool setLocoSpeed(uint16_t address, uint8_t speed, uint8_t steps, bool dir, bool sendToZ21 = true);
 
     bool isLocoPresent(uint16_t address)
     {

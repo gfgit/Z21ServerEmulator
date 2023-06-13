@@ -233,11 +233,13 @@ extern "C" void notifyz21LocoSpeed(uint16_t Adr, uint8_t speed, uint8_t steps)
 
     auto locoMgr = m_instance->getLocoMgr();
 
+    //Avoid sending back to Z21 because it is already handled internally by z21Class::receive()
+    //Otherwise 2 identical LAN_X_LOCO_INFO feedback messages would be sent which is not ideal.
     switch (steps)
     {
-    case 14: locoMgr->setSpeed14(Adr, speed); break;
-    case 28: locoMgr->setSpeed28(Adr, speed); break;
-    default: locoMgr->setSpeed128(Adr, speed);
+    case 14: locoMgr->setSpeed14(Adr, speed, false); break;
+    case 28: locoMgr->setSpeed28(Adr, speed, false); break;
+    default: locoMgr->setSpeed128(Adr, speed, false);
     }
 }
 
