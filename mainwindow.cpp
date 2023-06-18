@@ -63,14 +63,16 @@ void MainWindow::setupConnections(Z21Server *z21)
     m_server = z21;
 
     connect(m_server, &Z21Server::powerStateChanged,
-            m_powerStatusLed, &PowerStatusLED::setPowerState_slot);
+            m_powerStatusLed, &PowerStatusLED::setPowerState_slot, Qt::QueuedConnection);
     m_powerStatusLed->setPowerState(m_server->getPower());
 
     connect(m_powerCombo, qOverload<int>(&QComboBox::currentIndexChanged),
             this, &MainWindow::onPowerComboIndexChanged);
     connect(m_server, &Z21Server::powerStateChanged,
-            this, &MainWindow::onPowerStateChanged);
-    onPowerStateChanged(int(m_server->getPower()));
+            this, &MainWindow::onPowerStateChangedFromZ21, Qt::QueuedConnection);
+    onPowerStateChangedFromZ21(int(m_server->getPower()));
+
+    connect(ui->actionForce_Update, &QAction::triggered, m_server, &Z21Server::forceReadUpdate);
 
     connect(m_server, &QObject::destroyed, this, [this](){ m_server = nullptr; });
 
@@ -79,10 +81,12 @@ void MainWindow::setupConnections(Z21Server *z21)
     locoModel->setLocoMgr(m_server->getLocoMgr());
 }
 
-void MainWindow::onPowerStateChanged(int state)
+void MainWindow::onPowerStateChangedFromZ21(int state)
 {
     int idx = m_powerCombo->findData(state);
+    QSignalBlocker blk(m_powerCombo);
     m_powerCombo->setCurrentIndex(idx);
+    m_powerStatusLed->setPowerState_slot(state);
 }
 
 void MainWindow::onPowerComboIndexChanged()
@@ -92,7 +96,11 @@ void MainWindow::onPowerComboIndexChanged()
     if(!m_server || state == m_server->getPower())
         return;
 
-    m_server->setPower(state);
+    QMetaObject::invokeMethod(m_server,
+        [this, state]()
+        {
+            m_server->setPower(state);
+        }, Qt::QueuedConnection);
 }
 
 void MainWindow::onNewThrottle()

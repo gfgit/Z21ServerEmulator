@@ -81,7 +81,9 @@ ThrottleWidget::ThrottleWidget(LocoManager *locoMgr, QWidget *parent) :
     connect(emergencyStopBut, &QPushButton::clicked, this, &ThrottleWidget::emergencyStop);
     connect(stopBut, &QPushButton::clicked, this, &ThrottleWidget::normalStop);
 
-    connect(m_locoMgr, &LocoManager::locoSpeedChanged, this, &ThrottleWidget::handleSpeedChanged);
+    connect(this, &ThrottleWidget::setLocoSpeed, m_locoMgr, &LocoManager::setLocoSpeed, Qt::QueuedConnection);
+    connect(this, &ThrottleWidget::setLocoDir, m_locoMgr, &LocoManager::setLocoDir_slot, Qt::QueuedConnection);
+    connect(m_locoMgr, &LocoManager::locoSpeedChanged, this, &ThrottleWidget::handleSpeedChanged, Qt::QueuedConnection);
     connect(addressSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ThrottleWidget::loadLoco);
     connect(syncSpeedCheck, &QCheckBox::toggled, this, &ThrottleWidget::setSyncSpeed);
     connect(stepsCombo, qOverload<int>(&QComboBox::activated), this,
@@ -120,7 +122,7 @@ void ThrottleWidget::setDirection(Direction value)
     reverseBut->setPalette(m_direction == Direction::Reverse ? redPal : pal);
 
     if(m_address)
-        m_locoMgr->setLocoDir(addressSpinBox->value(), m_direction == Direction::Forward);
+        emit setLocoDir(addressSpinBox->value(), m_direction == Direction::Forward);
 }
 
 void ThrottleWidget::emergencyStop()
@@ -222,8 +224,8 @@ void ThrottleWidget::sendToZ21()
 
     int encodedSpeed = encodeSpeed(m_speed, m_speedSteps, m_status);
 
-    m_locoMgr->setLocoSpeed(m_address, encodedSpeed,
-                            Z21::speedStepsToInt(m_speedSteps), m_direction == Direction::Forward);
+    emit setLocoSpeed(m_address, encodedSpeed,
+                      Z21::speedStepsToInt(m_speedSteps), m_direction == Direction::Forward, true);
 }
 
 void ThrottleWidget::setSpeed_slot(int speed)

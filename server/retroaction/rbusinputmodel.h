@@ -44,6 +44,9 @@ public:
         return {module, port};
     }
 
+signals:
+    void setInputState(int module, int port, bool val);
+
 private slots:
     void onInputStateChanged(int module, int port, bool val);
 

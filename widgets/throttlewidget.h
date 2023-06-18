@@ -34,6 +34,10 @@ public:
 
     void setDirection(Direction value);
 
+signals:
+    void setLocoDir(uint16_t address, bool dir);
+    bool setLocoSpeed(uint16_t address, uint8_t speed, uint8_t steps, bool dir, bool sendToZ21);
+
 public slots:
     void emergencyStop();
     void normalStop();

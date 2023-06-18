@@ -71,6 +71,11 @@ bool LocoManager::setLocoSpeed(uint16_t address, uint8_t speed, uint8_t steps, b
     return true;
 }
 
+void LocoManager::setLocoDir_slot(uint16_t address, bool dir)
+{
+    setLocoDir(address, dir);
+}
+
 int LocoManager::getLocoSpeed(uint16_t address)
 {
     uint8_t Slot = getSlotForAddress(address);

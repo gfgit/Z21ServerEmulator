@@ -25,7 +25,7 @@ public:
     void setupConnections(Z21Server *z21);
 
 private slots:
-    void onPowerStateChanged(int state);
+    void onPowerStateChangedFromZ21(int state);
     void onPowerComboIndexChanged();
     void onNewThrottle();
 

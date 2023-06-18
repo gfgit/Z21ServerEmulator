@@ -44,6 +44,9 @@ public:
         return {module, port};
     }
 
+signals:
+    void setAccessoryState(int index, int port, bool val);
+
 private slots:
     void onAccessoryStateChanged(int accIndex, int port, bool val);
 

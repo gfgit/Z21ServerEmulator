@@ -80,7 +80,7 @@ bool AccessoryModel::setData(const QModelIndex &idx, const QVariant& value, int 
         return false;
 
     bool val = value.value<Qt::CheckState>() == Qt::Checked;
-    m_accessoryMgr->setAccessoryState(accessory.first, accessory.second, val);
+    emit setAccessoryState(accessory.first, accessory.second, val);
     return true;
 }
 
@@ -111,6 +111,8 @@ void AccessoryModel::setAccessoryMgr(AccessoryManager *newRetroAction)
     {
         disconnect(m_accessoryMgr, &AccessoryManager::accessoryStateChanged,
                    this, &AccessoryModel::onAccessoryStateChanged);
+        disconnect(this, &AccessoryModel::setAccessoryState,
+                   m_accessoryMgr, qOverload<int, int, bool>(&AccessoryManager::setAccessoryState));
     }
 
     m_accessoryMgr = newRetroAction;
@@ -118,7 +120,10 @@ void AccessoryModel::setAccessoryMgr(AccessoryManager *newRetroAction)
     if(m_accessoryMgr)
     {
         connect(m_accessoryMgr, &AccessoryManager::accessoryStateChanged,
-                this, &AccessoryModel::onAccessoryStateChanged);
+                this, &AccessoryModel::onAccessoryStateChanged, Qt::QueuedConnection);
+        connect(this, &AccessoryModel::setAccessoryState,
+                m_accessoryMgr, qOverload<int, int, bool>(&AccessoryManager::setAccessoryState),
+                Qt::QueuedConnection);
     }
 
     //Refresh

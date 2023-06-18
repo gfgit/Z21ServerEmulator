@@ -22,9 +22,10 @@ private:
 
     explicit AccessoryManager(Z21Server *server);
 
-public:
+public slots:
     void setAccessoryState(int index, int port, bool val);
 
+public:
     inline void setAccessoryState(int address, bool val)
     {
         setAccessoryState(address / 8, address % 8, val);

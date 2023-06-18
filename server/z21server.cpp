@@ -2,6 +2,7 @@
 
 #include <QUdpSocket>
 #include <QtEndian>
+#include <QElapsedTimer>
 
 #include "z21library/z21.h"
 
@@ -326,7 +327,10 @@ void Z21Server::readPendingDatagram()
 {
     constexpr int MAX_BUF_SIZE = 4096;
 
-    while(m_udpServer->hasPendingDatagrams())
+    QElapsedTimer timer;
+    timer.start();
+
+    while(m_udpServer->hasPendingDatagrams() && timer.elapsed() < 500)
     {
         //Allocate buffer
         qint64 sz = m_udpServer->pendingDatagramSize();
@@ -350,11 +354,11 @@ void Z21Server::readPendingDatagram()
             uint16_t msgSize = *reinterpret_cast<uint16_t *>(ptr);
             msgSize = qFromLittleEndian(msgSize);
 
-            if(msgSize > sz)
+            if(msgSize > sz || !msgSize)
                 break;
 
             //Simulate network slowdown
-            std::this_thread::sleep_for(std::chrono::milliseconds(250));
+            //std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
             //Handle message
             m_z21->receive(clientIdx, ptr);
@@ -363,6 +367,16 @@ void Z21Server::readPendingDatagram()
             ptr += msgSize;
             sz -= msgSize;
         }
+    }
+
+    if(m_udpServer->hasPendingDatagrams() && !socketReadScheduled)
+    {
+        //Manually schedule next read
+        QMetaObject::invokeMethod(this, [this]()
+            {
+                socketReadScheduled = false;
+                readPendingDatagram();
+            }, Qt::QueuedConnection);
     }
 }
 
@@ -430,6 +444,11 @@ AccessoryManager *Z21Server::getAccessoryMgr() const
 LocoManager *Z21Server::getLocoMgr() const
 {
     return m_locoMgr;
+}
+
+void Z21Server::forceReadUpdate()
+{
+    readPendingDatagram();
 }
 
 #ifdef WITH_LOCONET2

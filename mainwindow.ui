@@ -68,6 +68,7 @@
      <string>Drive</string>
     </property>
     <addaction name="actionNew_Throttle"/>
+    <addaction name="actionForce_Update"/>
    </widget>
    <addaction name="menuDrive"/>
   </widget>
@@ -75,6 +76,11 @@
   <action name="actionNew_Throttle">
    <property name="text">
     <string>New Throttle</string>
+   </property>
+  </action>
+  <action name="actionForce_Update">
+   <property name="text">
+    <string>Force Update</string>
    </property>
   </action>
  </widget>

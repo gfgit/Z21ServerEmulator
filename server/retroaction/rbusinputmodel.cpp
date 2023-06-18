@@ -80,7 +80,7 @@ bool RBusInputModel::setData(const QModelIndex &idx, const QVariant& value, int 
         return false;
 
     bool val = value.value<Qt::CheckState>() == Qt::Checked;
-    m_retroAction->setInputState(module.first, module.second, val);
+    emit setInputState(module.first, module.second, val);
     return true;
 }
 
@@ -111,6 +111,8 @@ void RBusInputModel::setRetroAction(RBusRetroaction *newRetroAction)
     {
         disconnect(m_retroAction, &RBusRetroaction::inputStateChanged,
                    this, &RBusInputModel::onInputStateChanged);
+        disconnect(this, &RBusInputModel::setInputState,
+                   m_retroAction, &RBusRetroaction::setInputState);
     }
 
     m_retroAction = newRetroAction;
@@ -118,7 +120,10 @@ void RBusInputModel::setRetroAction(RBusRetroaction *newRetroAction)
     if(m_retroAction)
     {
         connect(m_retroAction, &RBusRetroaction::inputStateChanged,
-                this, &RBusInputModel::onInputStateChanged);
+                this, &RBusInputModel::onInputStateChanged, Qt::QueuedConnection);
+        connect(this, &RBusInputModel::setInputState,
+                m_retroAction, &RBusRetroaction::setInputState,
+                Qt::QueuedConnection);
     }
 
     //Refresh

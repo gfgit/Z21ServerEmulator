@@ -28,9 +28,10 @@ private:
 
     void sendS88Status(int group);
 
-public:
+public slots:
     void setInputState(int module, int port, bool val);
 
+public:
     inline bool getInputState(int module, int port) const
     {
         if(module < 0 || module >= Z21::S88_MODULE_COUNT)

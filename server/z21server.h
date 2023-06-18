@@ -49,6 +49,9 @@ public:
 signals:
     void powerStateChanged(int state);
 
+public slots:
+    void forceReadUpdate();
+
 private slots:
     void readPendingDatagram();
 
@@ -78,6 +81,7 @@ private:
 
 private:
     QUdpSocket *m_udpServer = nullptr;
+    bool socketReadScheduled = false;
 
     struct Client
     {

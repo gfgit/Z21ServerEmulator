@@ -237,12 +237,15 @@ public:
         emit locoSpeedChanged(address, loco_slots[Slot].getSpeed(), speedSteps, loco_slots[Slot].getDirection());
     }
 
-    bool setLocoSpeed(uint16_t address, uint8_t speed, uint8_t steps, bool dir, bool sendToZ21 = true);
 
     bool isLocoPresent(uint16_t address)
     {
         return getSlotForAddress(address, false) == UINT8_MAX;
     }
+
+public slots:
+    void setLocoDir_slot(uint16_t address, bool dir);
+    bool setLocoSpeed(uint16_t address, uint8_t speed, uint8_t steps, bool dir, bool sendToZ21 = true);
 
 signals:
     void locoSlotChanged(int Slot);
