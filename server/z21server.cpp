@@ -264,6 +264,13 @@ extern "C" uint8_t notifyz21ClientHash(uint8_t client)
     return m_instance->getClientHash(client);
 }
 
+extern "C" void notifyz21ClientRemoved(uint8_t client)
+{
+    if(!m_instance)
+        return;
+    m_instance->removeClient(client);
+}
+
 
 //---------------------------------------------------------
 // Z21Server
@@ -416,6 +423,9 @@ void Z21Server::sendDatagram(int clientIdx, const char *data, const qint64 size)
     }
     else
     {
+        if(clientIdx < 1 || clientIdx > m_clients.size())
+            return;
+
         const Client client = m_clients.value(clientIdx - 1);
         if(!client.remotePort || client.remoteAddr.isNull())
             return; //Skip invalid clients
@@ -426,6 +436,9 @@ void Z21Server::sendDatagram(int clientIdx, const char *data, const qint64 size)
 
 quint8 Z21Server::getClientHash(int clientIdx)
 {
+    if(clientIdx < 1 || clientIdx > m_clients.size())
+        return 0;
+
     const Client client = m_clients.value(clientIdx - 1);
     if(!client.remotePort || client.remoteAddr.isNull())
         return 0; //Skip invalid clients
@@ -435,6 +448,13 @@ quint8 Z21Server::getClientHash(int clientIdx)
 
     quint8 HashIP = fourBytes[0] ^ fourBytes[1] ^ fourBytes[2] ^ fourBytes[3]; //make Hash from IP
     return HashIP;
+}
+
+void Z21Server::removeClient(int clientIdx)
+{
+    if(clientIdx < 1 || clientIdx > m_clients.size())
+        return;
+    m_clients.remove(clientIdx - 1);
 }
 
 RBusRetroaction *Z21Server::getRBUS() const
