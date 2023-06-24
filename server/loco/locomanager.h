@@ -240,7 +240,7 @@ public:
 
     bool isLocoPresent(uint16_t address)
     {
-        return getSlotForAddress(address, false) == UINT8_MAX;
+        return getSlotForAddress(address, false) != UINT8_MAX;
     }
 
 public slots:
