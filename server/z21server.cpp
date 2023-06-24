@@ -3,6 +3,7 @@
 #include <QUdpSocket>
 #include <QtEndian>
 #include <QElapsedTimer>
+#include <QTimer>
 
 #include "z21library/z21.h"
 
@@ -284,6 +285,9 @@ Z21Server::Z21Server(QObject *parent) :
 
     m_udpServer = new QUdpSocket(this);
     connect(m_udpServer, &QUdpSocket::readyRead, this, &Z21Server::readPendingDatagram);
+
+    m_forceReadTimer = new QTimer(this);
+    connect(m_forceReadTimer, &QTimer::timeout, this, &Z21Server::forceReadUpdate);
 }
 
 Z21Server::~Z21Server()
@@ -301,6 +305,8 @@ bool Z21Server::startServer(quint16 port)
 
     m_udpServer->setSocketOption(QUdpSocket::ReceiveBufferSizeSocketOption, 2 * 65536);
     qDebug() << "UDP RECV BUF:" << m_udpServer->socketOption(QUdpSocket::ReceiveBufferSizeSocketOption);
+
+    m_forceReadTimer->start(500);
 
     setPower(Z21::PowerState::Normal);
     return true;

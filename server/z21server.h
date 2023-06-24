@@ -8,6 +8,8 @@
 #include "z21server_constants.h"
 
 class QUdpSocket;
+class QTimer;
+
 class z21Class;
 
 class RBusRetroaction;
@@ -81,6 +83,7 @@ private:
 
 private:
     QUdpSocket *m_udpServer = nullptr;
+    QTimer *m_forceReadTimer = nullptr;
     bool socketReadScheduled = false;
 
     struct Client
