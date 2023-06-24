@@ -32,7 +32,7 @@ class ThrottleWidget : public QWidget
 public:
     ThrottleWidget(LocoManager *locoMgr, QWidget *parent = nullptr);
 
-    void setDirection(Direction value);
+    void setDirection(Direction value, bool sendToZ21);
 
 signals:
     void setLocoDir(uint16_t address, bool dir);
