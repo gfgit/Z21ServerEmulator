@@ -13,14 +13,12 @@ class QCheckBox;
 
 class LocoManager;
 
-enum class Direction
-{
+enum class Direction {
     Forward = 0,
     Reverse
 };
 
-enum class LocoStatus
-{
+enum class LocoStatus {
     Stopped = 0,
     EmergencyStopped,
     Running
@@ -54,7 +52,7 @@ private:
     void setLocoStatus(LocoStatus status, bool send = true);
     void setSpeed(int speed, bool send = true);
     static int encodeSpeed(const int speed, Z21::DCCSpeedSteps speedSteps, LocoStatus status);
-    static int decodeSpeed(int speed, Z21::DCCSpeedSteps speedSteps, LocoStatus& outStatus);
+    static int decodeSpeed(int speed, Z21::DCCSpeedSteps speedSteps, LocoStatus &outStatus);
 
 private:
     LocoManager *m_locoMgr;

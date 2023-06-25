@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 
     int ret = a.exec();
 
-    if(w)
+    if (w)
         delete w;
 
     z21Thread.quit();

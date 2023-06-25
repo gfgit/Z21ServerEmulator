@@ -92,8 +92,8 @@ void LocoManager::initSlot(uint8_t Slot, uint16_t address)
 {
     const Z21::DCCSpeedSteps DCCdefaultSteps = Z21::DCCSpeedSteps::_128;
     loco_slots[Slot].adr = address | (uint8_t(DCCdefaultSteps) << 14);
-    //0x4000; //0xC000;	// c = '3' => 128 speed steps
-    loco_slots[Slot].speed = 0x80;	//default direction is forward
+    //0x4000; //0xC000; // c = '3' => 128 speed steps
+    loco_slots[Slot].speed = 0x80;  //default direction is forward
     loco_slots[Slot].f0 = 0x00;
     loco_slots[Slot].f1 = 0x00;
     loco_slots[Slot].f2 = 0x00;
@@ -131,13 +131,13 @@ uint8_t LocoManager::getSlotForAddress(uint16_t address, bool add)
 
 void LocoManager::getLocoData(uint8_t Slot, uint8_t loco_data[])
 {
-    //uint8_t Steps, uint8_t Speed, uint8_t F0, uint8_t F1, uint8_t F2, uint8_t F3		==> F0 bis F31
-    loco_data[0] = loco_slots[Slot].adr >> 14; 	//Steps
+    //uint8_t Steps, uint8_t Speed, uint8_t F0, uint8_t F1, uint8_t F2, uint8_t F3      ==> F0 bis F31
+    loco_data[0] = loco_slots[Slot].adr >> 14; //Steps
     loco_data[1] = loco_slots[Slot].speed;
-    loco_data[2] = loco_slots[Slot].f0;	//F31 F30 F29 F0 - F4 F3 F2 F1
-    loco_data[3] = loco_slots[Slot].f1;	//F12 - F5
-    loco_data[4] = loco_slots[Slot].f2;	//F20 - F13
-    loco_data[5] = loco_slots[Slot].f3;	//F28 - F21
+    loco_data[2] = loco_slots[Slot].f0; //F31 F30 F29 F0 - F4 F3 F2 F1
+    loco_data[3] = loco_slots[Slot].f1; //F12 - F5
+    loco_data[4] = loco_slots[Slot].f2; //F20 - F13
+    loco_data[5] = loco_slots[Slot].f3; //F28 - F21
 
     emit locoSlotRequested(loco_slots[Slot].address());
 }

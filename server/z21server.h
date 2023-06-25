@@ -60,7 +60,7 @@ private slots:
 
 private:
     struct Client;
-    int addClientAndGetIndex(const Client& client);
+    int addClientAndGetIndex(const Client &client);
     void sendDatagram(int clientIdx, const char *data, const qint64 size);
     quint8 getClientHash(int clientIdx);
     void removeClient(int clientIdx);
@@ -94,7 +94,7 @@ private:
         QHostAddress remoteAddr;
         quint16 remotePort = 0;
 
-        inline bool operator==(const Client& other) const
+        inline bool operator==(const Client &other) const
         {
             return remoteAddr == other.remoteAddr && remotePort == other.remotePort;
         }

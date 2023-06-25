@@ -3,30 +3,29 @@
 
 #include <cstdint>
 
-//Arduino compatibility types
+// Arduino compatibility types
 typedef uint8_t byte;
 typedef bool boolean;
 
-#define word(a, b)  ( ( (a) & 0xFF ) << 8 ) | ( (b) & 0xFF )
-#define highByte(a) ( ( (a) >> 8 ) & 0xFF )
-#define lowByte(b)  ( (b) & 0xFF )
+#define word(a, b)                     (((a)&0xFF) << 8) | ((b)&0xFF)
+#define highByte(a)                    (((a) >> 8) & 0xFF)
+#define lowByte(b)                     ((b)&0xFF)
 
-#define bitRead(value, bit) (((value) >> (bit)) & 0x01)
-#define bitSet(value, bit) ((value) |= (1UL << (bit)))
-#define bitClear(value, bit) ((value) &= ~(1UL << (bit)))
+#define bitRead(value, bit)            (((value) >> (bit)) & 0x01)
+#define bitSet(value, bit)             ((value) |= (1UL << (bit)))
+#define bitClear(value, bit)           ((value) &= ~(1UL << (bit)))
 #define bitWrite(value, bit, bitvalue) (bitvalue ? bitSet(value, bit) : bitClear(value, bit))
 
 uint64_t millis();
 void init_millis();
 
-//void arduino_setup();
-//void arduino_loop();
+// void arduino_setup();
+// void arduino_loop();
 
-//Debugging
-//#define SERIALDEBUG
+// Debugging
+// #define SERIALDEBUG
 
-enum SerialEmuBase
-{
+enum SerialEmuBase {
     DEC = 0,
     BIN,
     HEX
@@ -45,7 +44,6 @@ public:
 
 static SerialEmulator Serial;
 
-
 class ArduinoCompatEEPROM
 {
 public:
@@ -60,7 +58,7 @@ public:
         write(address, value);
     }
 
-    static const int MAX_SIZE = 32 * 1024; //32 KB storage
+    static const int MAX_SIZE = 32 * 1024; // 32 KB storage
     byte storage[MAX_SIZE];
 };
 

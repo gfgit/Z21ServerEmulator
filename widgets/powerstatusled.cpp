@@ -11,22 +11,21 @@ QRgb getZ21PowerStateColor(Z21::PowerState state)
     {
     case Z21::PowerState::Normal:
     case Z21::PowerState::EmergencyStop:
-        return qRgb( 33, 128, 252);
+        return qRgb(33, 128, 252);
     case Z21::PowerState::TrackVoltageOff:
-        return qRgb(  0,   0,  0);
+        return qRgb(0, 0, 0);
     case Z21::PowerState::ShortCircuit:
-        return qRgb(251,  42,  29);
+        return qRgb(251, 42, 29);
     case Z21::PowerState::ServiceMode:
         return qRgb(125, 248, 108);
     default:
         break;
     }
 
-    return qRgb(128, 128, 128); //Gray for Unknown value
+    return qRgb(128, 128, 128); // Gray for Unknown value
 }
 
-PowerStatusLED::PowerStatusLED(QWidget *parent) :
-    QWidget{parent}
+PowerStatusLED::PowerStatusLED(QWidget *parent) : QWidget{parent}
 {
     setMinimumSize(50, 100);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
@@ -72,7 +71,7 @@ void PowerStatusLED::setPowerState_slot(int state)
 
 void PowerStatusLED::timerEvent(QTimerEvent *e)
 {
-    if(e->timerId() == m_blinkTimerId)
+    if (e->timerId() == m_blinkTimerId)
     {
         m_blinkState = !m_blinkState;
         update();
@@ -83,7 +82,7 @@ void PowerStatusLED::paintEvent(QPaintEvent *e)
 {
     QPainter painter(this);
 
-    //White background
+    // White background
     painter.fillRect(e->rect(), Qt::white);
 
     QRectF ledRect = rect();
@@ -92,9 +91,9 @@ void PowerStatusLED::paintEvent(QPaintEvent *e)
     QRectF textRect = rect();
     textRect.setLeft(ledRect.right());
 
-    if(m_blinkState)
+    if (m_blinkState)
     {
-        //Draw LED circe
+        // Draw LED circe
         QColor color(getZ21PowerStateColor(m_powerState));
         painter.setBrush(color);
 
@@ -119,7 +118,7 @@ void PowerStatusLED::paintEvent(QPaintEvent *e)
 
 void PowerStatusLED::startBlinkTimer()
 {
-    if(m_blinkTimerId)
+    if (m_blinkTimerId)
         return;
     m_blinkTimerId = startTimer(1000, Qt::CoarseTimer);
     m_blinkState = true;
@@ -127,7 +126,7 @@ void PowerStatusLED::startBlinkTimer()
 
 void PowerStatusLED::stopBlinkTimer()
 {
-    if(m_blinkTimerId)
+    if (m_blinkTimerId)
     {
         killTimer(m_blinkTimerId);
         m_blinkTimerId = 0;

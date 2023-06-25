@@ -27,42 +27,47 @@ void init_millis()
 
 ArduinoCompatEEPROM::ArduinoCompatEEPROM()
 {
-    //EEPROM bytes are default initialized to 255
-    for(int i = 0; i < MAX_SIZE; i++)
+    // EEPROM bytes are default initialized to 255
+    for (int i = 0; i < MAX_SIZE; i++)
         storage[i] = 255;
 }
 
 byte ArduinoCompatEEPROM::read(int address)
 {
-    if(address < 0 || address >= MAX_SIZE)
+    if (address < 0 || address >= MAX_SIZE)
     {
-        std::cerr << "EEPROM READ addr: " << address << " invalid, size is: " << MAX_SIZE << std::endl << std::flush;
+        std::cerr << "EEPROM READ addr: " << address << " invalid, size is: " << MAX_SIZE
+                  << std::endl
+                  << std::flush;
         return 255;
     }
 
     byte value = storage[address];
-    //std::cerr << "EEPROM READ addr: " << address << " val: " << int(value) << std::endl << std::flush;
+    // std::cerr << "EEPROM READ addr: " << address << " val: " << int(value) << std::endl <<
+    // std::flush;
     return value;
 }
 
 void ArduinoCompatEEPROM::write(int address, byte value)
 {
-    if(address < 0 || address >= MAX_SIZE)
+    if (address < 0 || address >= MAX_SIZE)
     {
-        std::cerr << "EEPROM WRITE addr: " << address << " invalid, size is: " << MAX_SIZE << std::endl << std::flush;
+        std::cerr << "EEPROM WRITE addr: " << address << " invalid, size is: " << MAX_SIZE
+                  << std::endl
+                  << std::flush;
         return;
     }
 
-    //std::cerr << "EEPROM WRITE addr: " << address << " val: " << int(value) << std::endl << std::flush;
+    // std::cerr << "EEPROM WRITE addr: " << address << " val: " << int(value) << std::endl <<
+    // std::flush;
     storage[address] = value;
 }
 
 ////--------------------------------------------------------------------------------------------
 
-
 void SerialEmulator::print(const char *str)
 {
-    if(str)
+    if (str)
         std::cout << str << std::flush;
 }
 
@@ -70,7 +75,7 @@ void SerialEmulator::print(int val, int base)
 {
     auto flags = std::cout.flags();
 
-    if(base == BIN)
+    if (base == BIN)
     {
         std::bitset<sizeof(val) * 8> bit(val);
         std::cout << val;

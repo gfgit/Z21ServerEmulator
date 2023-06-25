@@ -521,7 +521,7 @@ void LoconetSlotServer::onLocoSND(const uint8_t *LnPacketData)
             return;
         }
 
-        m_server->getLocoMgr()->setFunctions5to8(m_slots[LnPacketData[1]].LAdr, LnPacketData[2]);	//- F8 F7 F6 F5
+        m_server->getLocoMgr()->setFunctions5to8(m_slots[LnPacketData[1]].LAdr, LnPacketData[2]); //- F8 F7 F6 F5
 
         m_server->m_z21->setLocoStateExt(m_slots[LnPacketData[1]].LAdr);
 

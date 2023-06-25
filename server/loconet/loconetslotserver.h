@@ -8,7 +8,7 @@
 #include "server/z21server_constants.h"
 
 
-typedef struct	//SLOT
+typedef struct //SLOT
 {
     uint16_t LAdr;
     uint8_t Status;
